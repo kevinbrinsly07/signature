@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature Capture App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .slider-thumb::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        .slider-thumb::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            border: none;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gradient-to-br from-gray-900 to-black min-h-screen flex flex-col items-center justify-center p-5">
+    <div class="lg:p-8 w-full max-w-7xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-700 to-purple-800 rounded-full mb-2">
+                <i class="fas fa-signature text-white text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-200 mb-2">Signature Capture</h1>
+            <p class="text-md text-gray-400">Create your digital signature with ease</p>
+        </div>
+
+        <!-- Canvas and Controls Section -->
+        <div class="flex flex-col lg:flex-row gap-6 mb-8">
+            <!-- Canvas Section -->
+            <div class="flex-1 bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl md:p-5 shadow-inner">
+                <canvas id="signatureCanvas" width="800" height="400" class="border-4 border-slate-600 rounded-lg bg-white shadow-lg cursor-crosshair w-full h-auto max-w-full mx-auto block"></canvas>
+            </div>
+
+            <!-- Controls -->
+            <div class="lg:w-64 lg:p-6">
+                <h3 class="text-xl font-bold text-gray-100 mb-6 flex items-center justify-center">
+                    <i class="fas fa-tools mr-3 text-blue-400"></i>
+                    Drawing Tools
+                    <i class="fas fa-tools ml-3 text-blue-400"></i>
+                </h3>
+                <div class="space-y-6">
+                    <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-600 rounded-lg p-5 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                        <label for="thickness" class="text-sm font-semibold text-gray-200 mb-3 flex items-center">
+                            <i class="fas fa-paint-brush mr-2 text-blue-400"></i>
+                            Pen Thickness
+                        </label>
+                        <div class="flex items-center space-x-4">
+                            <input type="range" id="thickness" min="1" max="20" value="5" class="flex-1 h-3 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg appearance-none cursor-pointer slider-thumb">
+                            <span id="thicknessValue" class="text-lg font-bold text-blue-500 min-w-[2rem] text-center">5</span>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-600 rounded-lg p-5 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                        <label for="colorPicker" class="text-sm font-semibold text-gray-200 mb-3 flex items-center">
+                            <i class="fas fa-palette mr-2 text-blue-400"></i>
+                            Pen Color
+                        </label>
+                        <div class="flex items-center space-x-4">
+                            <input type="color" id="colorPicker" value="#000000" class="w-16 h-12 border-2 border-gray-500 rounded-lg cursor-pointer shadow-inner">
+                            <div class="flex-1 text-xs text-blue-400">
+                                Choose your signature color
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row justify-start gap-4 mb-8">
+            <button id="clearBtn" class="bg-gradient-to-r from-red-600 to-red-600 hover:from-red-700 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <i class="fas fa-trash mr-2"></i>Clear All
+            </button>
+            <button id="undoBtn" class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <i class="fas fa-undo mr-2"></i>Undo
+            </button>
+            <button id="saveBtn" class="bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <i class="fas fa-save mr-2"></i>Save Signature
+            </button>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-600 rounded-lg p-6 mb-8">
+            <h2 class="font-semibold mb-4 text-gray-200 flex items-center">
+                <i class="fas fa-info-circle mr-2 text-blue-400"></i>
+                How to Use
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+                <div>
+                    <h3 class="font-medium mb-2">Drawing</h3>
+                    <ul class="space-y-1">
+                        <li><i class="fas fa-mouse-pointer mr-1 text-blue-400"></i> Click and drag to draw</li>
+                        <li><i class="fas fa-mobile-alt mr-1 text-blue-400"></i> Touch and move on mobile</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-medium mb-2">Tools</h3>
+                    <ul class="space-y-1">
+                        <li><i class="fas fa-sliders-h mr-1 text-blue-400"></i> Adjust thickness (1-20)</li>
+                        <li><i class="fas fa-palette mr-1 text-blue-400"></i> Choose any color</li>
+                        <li><i class="fas fa-undo mr-1 text-blue-400"></i> Undo last stroke (Ctrl+Z)</li>
+                        <li><i class="fas fa-trash mr-1 text-blue-400"></i> Clear entire canvas (Del)</li>
+                        <li><i class="fas fa-times mr-1 text-blue-400"></i> Close modal (Esc)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-400 text-sm border-t pt-6">
+            <p>&copy; 2025 Powered by Jaan Network</p>
+        </div>
+    </div>
+    <!-- Preview Modal -->
+    <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-lg w-full mx-4 transform scale-95 transition-transform duration-300" id="modalContent">
+            <div class="text-center mb-6">
+                <i class="fas fa-check-circle text-green-400 text-4xl mb-4"></i>
+                <h3 class="text-2xl font-bold text-gray-200">Signature Preview</h3>
+                <p class="text-gray-400">Review your signature before downloading</p>
+            </div>
+            <img id="previewImg" class="border-2 border-gray-600 rounded-lg w-full mb-6 shadow-lg" alt="Signature Preview">
+            <div class="flex justify-center gap-4">
+                <button id="confirmSave" class="bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <i class="fas fa-download mr-2"></i>Download PNG
+                </button>
+                <button id="cancelSave" class="bg-gray-600 hover:bg-gray-700 text-gray-200 font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>
