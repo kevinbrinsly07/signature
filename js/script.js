@@ -4,6 +4,10 @@ var drawing = false;
 var hasStarted = false;
 var undoStack = [];
 var currentMode = 'pen'; // 'pen' or 'eraser'
+let lastX = 0;
+let lastY = 0;
+let lastTime = 0;
+let baseWidth = 5;
 
 // Set drawing properties
 ctx.strokeStyle = '#000000';
@@ -13,7 +17,8 @@ ctx.lineJoin = 'round';
 
 // Thickness selector
 document.getElementById('thickness').addEventListener('input', function() {
-    ctx.lineWidth = this.value;
+    baseWidth = parseInt(this.value);
+    ctx.lineWidth = baseWidth;
     document.getElementById('thicknessValue').textContent = this.value;
 });
 
@@ -77,19 +82,42 @@ function startDrawing(e) {
     drawing = true;
     hasStarted = true;
     ctx.beginPath();
-    ctx.moveTo(getX(e), getY(e));
+    let x = getX(e);
+    let y = getY(e);
+    ctx.moveTo(x, y);
+    lastX = x;
+    lastY = y;
+    lastTime = Date.now();
 }
 
 function draw(e) {
     if (!drawing) return;
+    let x = getX(e);
+    let y = getY(e);
+    let currentTime = Date.now();
+    let distance = Math.sqrt((x - lastX) ** 2 + (y - lastY) ** 2);
+    let timeDiff = currentTime - lastTime;
+    if (timeDiff > 0) {
+        let speed = distance / timeDiff;
+        let maxSpeed = 3; // Reduced for more variation
+        let factor = Math.min(speed / maxSpeed, 1);
+        if (currentMode === 'pen') {
+            ctx.lineWidth = Math.max(baseWidth * (1 - factor * 0.9), 1); // Increased factor for stronger effect
+        } else {
+            ctx.lineWidth = baseWidth;
+        }
+    }
     if (!hasStarted) {
         ctx.beginPath();
-        ctx.moveTo(getX(e), getY(e));
+        ctx.moveTo(x, y);
         hasStarted = true;
     } else {
-        ctx.lineTo(getX(e), getY(e));
+        ctx.lineTo(x, y);
         ctx.stroke();
     }
+    lastX = x;
+    lastY = y;
+    lastTime = currentTime;
 }
 
 // Function to stop drawing
