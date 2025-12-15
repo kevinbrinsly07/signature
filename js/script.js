@@ -34,6 +34,8 @@ document.addEventListener('touchmove', function(e) {
     draw(e);
 });
 
+// Function to start drawing
+
 function startDrawing(e) {
     if (!drawing) {
         undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
@@ -43,17 +45,25 @@ function startDrawing(e) {
     } else {
         drawing = false;
     }
+// Function to draw on the canvas
+
 }
 
 function draw(e) {
     if (!drawing) return;
     ctx.lineTo(getX(e), getY(e));
     ctx.stroke();
+// Function to stop drawing (not used in current implementation)
+
 }
+
+// Helper function to get X coordinate from event
 
 function stopDrawing() {
     drawing = false;
 }
+
+// Helper function to get Y coordinate from event
 
 function getX(e) {
     var rect = canvas.getBoundingClientRect();
@@ -103,6 +113,8 @@ document.getElementById('confirmSave').addEventListener('click', function() {
     link.click();
     closeModal();
 });
+// Function to close the preview modal
+
 
 // Cancel save
 document.getElementById('cancelSave').addEventListener('click', function() {

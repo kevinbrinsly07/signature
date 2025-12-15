@@ -1,11 +1,24 @@
+<!--
+
+Signature Capture App
+
+This HTML file provides the user interface for a digital signature capture application.
+
+It includes a canvas for drawing, controls for pen thickness and color, and buttons for actions.
+
+-->
 <!DOCTYPE html>
 <html lang="en">
+<!-- Head Section: Contains metadata, styles, and external resources -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Page Title -->
     <title>Signature Capture App</title>
+    <!-- External CSS and JS libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom Styles for slider thumb -->
     <style>
         .slider-thumb::-webkit-slider-thumb {
             appearance: none;
@@ -27,7 +40,9 @@
         }
     </style>
 </head>
+<!-- Body Section: Main content of the page -->
 <body class="font-sans bg-gradient-to-br from-gray-900 to-black min-h-screen flex flex-col items-center justify-center p-5">
+    <!-- Main Container -->
     <div class="lg:p-8 w-full max-w-7xl">
         <!-- Header -->
         <div class="text-center mb-8">
@@ -143,6 +158,7 @@
             </div>
         </div>
     </div>
+    <!-- Include JavaScript file -->
     <script src="js/script.js"></script>
 </body>
 </html>
