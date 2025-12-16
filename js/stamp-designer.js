@@ -68,6 +68,32 @@ class StampDesigner {
             }
         });
 
+        // Fill pattern selector
+        document.getElementById('fillPattern').addEventListener('change', (e) => {
+            if (this.selectedShape !== null) {
+                this.shapes[this.selectedShape].fillPattern = e.target.value;
+                this.updatePatternControls();
+                this.drawStamp();
+            }
+        });
+
+        // Border pattern selector
+        document.getElementById('borderPattern').addEventListener('change', (e) => {
+            if (this.selectedShape !== null) {
+                this.shapes[this.selectedShape].borderPattern = e.target.value;
+                this.drawStamp();
+            }
+        });
+
+        // Pattern size slider
+        document.getElementById('patternSize').addEventListener('input', (e) => {
+            if (this.selectedShape !== null) {
+                this.shapes[this.selectedShape].patternSize = parseInt(e.target.value);
+                document.getElementById('patternSizeValue').textContent = e.target.value + 'px';
+                this.drawStamp();
+            }
+        });
+
         // Font family selector
         document.getElementById('fontFamily').addEventListener('change', (e) => {
             // Update existing text elements with new font family
@@ -235,6 +261,9 @@ class StampDesigner {
             color: '#000000', // Black color for stamp designs
             isFilled: true,
             borderThickness: 2,
+            fillPattern: 'solid', // Default to solid fill
+            patternSize: 20, // Default pattern size
+            borderPattern: 'solid', // Default to solid border
             x: this.canvas.width / 2 + (this.shapes.length * 80), // Increased offset for larger shapes
             y: this.canvas.height / 2 + (this.shapes.length * 80)
         };
@@ -261,17 +290,29 @@ class StampDesigner {
             document.getElementById('heightSlider').disabled = false;
             document.getElementById('stampColor').disabled = false;
             document.getElementById('fillToggle').disabled = false;
+            document.getElementById('fillPattern').disabled = false;
             
             // Border thickness controls - only enabled for hollow shapes
             if (shape.isFilled) {
                 document.getElementById('borderThickness').disabled = true;
                 document.getElementById('decreaseBorder').disabled = true;
                 document.getElementById('increaseBorder').disabled = true;
+                document.getElementById('borderPatternSection').style.display = 'none';
+                document.getElementById('borderPattern').disabled = true;
             } else {
                 document.getElementById('borderThickness').disabled = false;
                 document.getElementById('decreaseBorder').disabled = false;
                 document.getElementById('increaseBorder').disabled = false;
+                document.getElementById('borderPatternSection').style.display = 'block';
+                document.getElementById('borderPattern').disabled = false;
+                document.getElementById('borderPattern').value = shape.borderPattern || 'solid';
             }
+
+            // Update pattern controls
+            document.getElementById('fillPattern').value = shape.fillPattern || 'solid';
+            document.getElementById('patternSize').value = shape.patternSize || 20;
+            document.getElementById('patternSizeValue').textContent = (shape.patternSize || 20) + 'px';
+            this.updatePatternControls();
             
             // Disable text controls
             document.getElementById('curveSlider').disabled = true;
@@ -306,9 +347,13 @@ class StampDesigner {
             document.getElementById('heightSlider').disabled = true;
             document.getElementById('stampColor').disabled = true;
             document.getElementById('fillToggle').disabled = true;
+            document.getElementById('fillPattern').disabled = true;
+            document.getElementById('patternSize').disabled = true;
             document.getElementById('borderThickness').disabled = true;
             document.getElementById('decreaseBorder').disabled = true;
             document.getElementById('increaseBorder').disabled = true;
+            document.getElementById('borderPattern').disabled = true;
+            document.getElementById('borderPatternSection').style.display = 'none';
             document.getElementById('curveSlider').disabled = true;
             document.getElementById('letterSpacingSlider').disabled = true;
             document.getElementById('textColor').disabled = true;
@@ -317,6 +362,114 @@ class StampDesigner {
             document.getElementById('increaseFontSize').disabled = true;
         }
         this.updateSizeDisplay();
+    }
+
+    updatePatternControls() {
+        const patternSelect = document.getElementById('fillPattern');
+        const patternControls = document.getElementById('patternControls');
+        
+        if (patternSelect.value === 'solid') {
+            patternControls.style.display = 'none';
+            document.getElementById('patternSize').disabled = true;
+        } else {
+            patternControls.style.display = 'block';
+            document.getElementById('patternSize').disabled = false;
+        }
+    }
+
+    createPattern(patternType, color, size) {
+        const patternCanvas = document.createElement('canvas');
+        const patternCtx = patternCanvas.getContext('2d');
+        patternCanvas.width = size * 2;
+        patternCanvas.height = size * 2;
+
+        patternCtx.fillStyle = color;
+        patternCtx.strokeStyle = color;
+
+        switch (patternType) {
+            case 'dots':
+                patternCtx.beginPath();
+                patternCtx.arc(size / 2, size / 2, size / 4, 0, 2 * Math.PI);
+                patternCtx.fill();
+                break;
+
+            case 'stripes':
+                patternCtx.lineWidth = size / 4;
+                patternCtx.beginPath();
+                patternCtx.moveTo(0, 0);
+                patternCtx.lineTo(size * 2, size * 2);
+                patternCtx.stroke();
+                patternCtx.beginPath();
+                patternCtx.moveTo(size * 2, 0);
+                patternCtx.lineTo(0, size * 2);
+                patternCtx.stroke();
+                break;
+
+            case 'checks':
+                // Draw checkerboard pattern
+                patternCtx.fillRect(0, 0, size, size);
+                patternCtx.fillRect(size, size, size, size);
+                break;
+        }
+
+        return this.ctx.createPattern(patternCanvas, 'repeat');
+    }
+
+    createPatternForContext(ctx, patternType, color, size) {
+        const patternCanvas = document.createElement('canvas');
+        const patternCtx = patternCanvas.getContext('2d');
+        patternCanvas.width = size * 2;
+        patternCanvas.height = size * 2;
+
+        patternCtx.fillStyle = color;
+        patternCtx.strokeStyle = color;
+
+        switch (patternType) {
+            case 'dots':
+                patternCtx.beginPath();
+                patternCtx.arc(size / 2, size / 2, size / 4, 0, 2 * Math.PI);
+                patternCtx.fill();
+                break;
+
+            case 'stripes':
+                patternCtx.lineWidth = size / 4;
+                patternCtx.beginPath();
+                patternCtx.moveTo(0, 0);
+                patternCtx.lineTo(size * 2, size * 2);
+                patternCtx.stroke();
+                patternCtx.beginPath();
+                patternCtx.moveTo(size * 2, 0);
+                patternCtx.lineTo(0, size * 2);
+                patternCtx.stroke();
+                break;
+
+            case 'checks':
+                // Draw checkerboard pattern
+                patternCtx.fillRect(0, 0, size, size);
+                patternCtx.fillRect(size, size, size, size);
+                break;
+        }
+
+        return ctx.createPattern(patternCanvas, 'repeat');
+    }
+
+    setBorderPattern(ctx, patternType, thickness) {
+        switch (patternType) {
+            case 'solid':
+                ctx.setLineDash([]);
+                break;
+            case 'dashed':
+                ctx.setLineDash([thickness * 3, thickness * 2]);
+                break;
+            case 'dotted':
+                ctx.setLineDash([thickness, thickness * 2]);
+                break;
+            case 'dashdot':
+                ctx.setLineDash([thickness * 3, thickness, thickness, thickness]);
+                break;
+            default:
+                ctx.setLineDash([]);
+        }
     }
 
     drawStamp() {
@@ -328,9 +481,15 @@ class StampDesigner {
             const pixelWidth = shape.width * this.scale;
             const pixelHeight = shape.height * this.scale;
 
-            this.ctx.fillStyle = shape.color;
+            // Set fill style - use pattern if not solid
+            if (shape.fillPattern && shape.fillPattern !== 'solid') {
+                this.ctx.fillStyle = this.createPattern(shape.fillPattern, shape.color, shape.patternSize || 20);
+            } else {
+                this.ctx.fillStyle = shape.color;
+            }
             this.ctx.strokeStyle = shape.color;
             this.ctx.lineWidth = shape.borderThickness || 2;
+            this.setBorderPattern(this.ctx, shape.borderPattern || 'solid', shape.borderThickness || 2);
 
             switch (shape.type) {
                 case 'circle':
@@ -864,9 +1023,15 @@ class StampDesigner {
             const pixelWidth = shape.width * this.scale;
             const pixelHeight = shape.height * this.scale;
 
-            ctx.fillStyle = shape.color;
+            // Set fill style - use pattern if not solid
+            if (shape.fillPattern && shape.fillPattern !== 'solid') {
+                ctx.fillStyle = this.createPatternForContext(ctx, shape.fillPattern, shape.color, shape.patternSize || 20);
+            } else {
+                ctx.fillStyle = shape.color;
+            }
             ctx.strokeStyle = shape.color;
             ctx.lineWidth = shape.borderThickness || 2;
+            this.setBorderPattern(ctx, shape.borderPattern || 'solid', shape.borderThickness || 2);
 
             switch (shape.type) {
                 case 'circle':
