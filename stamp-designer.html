@@ -157,6 +157,15 @@
                                 <option value="Impact">Impact</option>
                                 <option value="Comic Sans MS">Comic Sans MS</option>
                             </select>
+                            <div>
+                                <label class="text-sm text-gray-300">Text Color:</label>
+                                <input type="color" id="textColor" value="#000000" class="w-full h-10 border-2 border-yellow-500 rounded-lg cursor-pointer shadow-inner">
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-300">Curve Level:</label>
+                                <input type="range" id="curveSlider" min="-100" max="100" value="0" class="w-full h-3 bg-gradient-to-r from-yellow-400 to-yellow-700 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <span id="curveValue" class="text-sm text-yellow-400">0</span>
+                            </div>
                             <button id="addTextBtn" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm">
                                 Add Text
                             </button>
@@ -182,25 +191,6 @@
                             <button id="deleteLayerBtn" class="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded text-xs disabled:opacity-50" disabled>
                                 <i class="fas fa-trash mr-1"></i>Delete
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- Save & Load -->
-                    <div class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
-                            <i class="fas fa-save mr-2 text-indigo-400"></i>
-                            Save & Load
-                        </h4>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button id="saveDesign" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-lg text-sm transition duration-300">
-                                <i class="fas fa-save mr-1"></i>Save
-                            </button>
-                            <button id="loadDesign" class="bg-teal-600 hover:bg-teal-700 text-white py-2 px-3 rounded-lg text-sm transition duration-300">
-                                <i class="fas fa-folder-open mr-1"></i>Load
-                            </button>
-                        </div>
-                        <div class="mt-2">
-                            <input type="text" id="designName" placeholder="Design name" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-400 text-sm">
                         </div>
                     </div>
 

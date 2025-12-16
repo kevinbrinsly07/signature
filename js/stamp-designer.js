@@ -9,7 +9,6 @@ class StampDesigner {
         this.isDragging = false;
         this.dragOffset = { x: 0, y: 0 };
         this.scale = 1; // Scale factor for rendering
-        this.savedDesigns = JSON.parse(localStorage.getItem('stampDesigns') || '{}');
 
         this.init();
         this.bindEvents();
@@ -81,18 +80,31 @@ class StampDesigner {
             this.addText();
         });
 
-        // Save/Load buttons
-        document.getElementById('saveDesign').addEventListener('click', () => {
-            this.saveDesign();
+        // Curve slider
+        document.getElementById('curveSlider').addEventListener('input', (e) => {
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.curve = parseInt(e.target.value);
+                document.getElementById('curveValue').textContent = this.selectedElement.curve;
+                this.drawStamp();
+            }
         });
 
-        document.getElementById('loadDesign').addEventListener('click', () => {
-            this.loadDesign();
+        // Text color picker
+        document.getElementById('textColor').addEventListener('input', (e) => {
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.color = e.target.value;
+                this.drawStamp();
+            }
         });
 
         // Export button
         document.getElementById('exportPNG').addEventListener('click', () => {
             this.exportStamp('png');
+        });
+
+        // Clear design button
+        document.getElementById('clearDesign').addEventListener('click', () => {
+            this.clearDesign();
         });
 
         // Canvas mouse events for dragging
@@ -163,17 +175,37 @@ class StampDesigner {
             document.getElementById('stampColor').value = shape.color;
             document.getElementById('fillToggle').checked = shape.isFilled;
             
-            // Enable controls
+            // Enable shape controls
             document.getElementById('widthSlider').disabled = false;
             document.getElementById('heightSlider').disabled = false;
             document.getElementById('stampColor').disabled = false;
             document.getElementById('fillToggle').disabled = false;
-        } else {
-            // Disable controls when no shape is selected
+            
+            // Disable text controls
+            document.getElementById('curveSlider').disabled = true;
+        } else if (this.selectedElement && this.selectedElement.text) {
+            // Text element selected
+            document.getElementById('curveSlider').value = this.selectedElement.curve || 0;
+            document.getElementById('curveValue').textContent = this.selectedElement.curve || 0;
+            document.getElementById('textColor').value = this.selectedElement.color || '#000000';
+            
+            // Enable text controls
+            document.getElementById('curveSlider').disabled = false;
+            document.getElementById('textColor').disabled = false;
+            
+            // Disable shape controls
             document.getElementById('widthSlider').disabled = true;
             document.getElementById('heightSlider').disabled = true;
             document.getElementById('stampColor').disabled = true;
             document.getElementById('fillToggle').disabled = true;
+        } else {
+            // Disable all controls when nothing is selected
+            document.getElementById('widthSlider').disabled = true;
+            document.getElementById('heightSlider').disabled = true;
+            document.getElementById('stampColor').disabled = true;
+            document.getElementById('fillToggle').disabled = true;
+            document.getElementById('curveSlider').disabled = true;
+            document.getElementById('textColor').disabled = true;
         }
         this.updateSizeDisplay();
     }
@@ -256,10 +288,14 @@ class StampDesigner {
             const x = textElement.x || this.canvas.width / 2;
             const y = textElement.y || (this.canvas.height / 2 + (i * 30));
 
-            this.ctx.fillText(textElement.text, x, y);
+            if (textElement.curve && textElement.curve !== 0) {
+                this.drawCurvedText(textElement.text, x, y, textElement.curve);
+            } else {
+                this.ctx.fillText(textElement.text, x, y);
+            }
 
             // Draw selection border if selected
-            if (this.selectedElement === textElement) {
+            if (this.selectedElement === textElement && (!textElement.curve || textElement.curve === 0)) {
                 const metrics = this.ctx.measureText(textElement.text);
                 const height = 16;
                 this.ctx.strokeStyle = '#fbbf24';
@@ -271,11 +307,34 @@ class StampDesigner {
         this.updateLayerList();
     }
 
+    drawCurvedText(text, centerX, centerY, curveLevel) {
+        if (curveLevel === 0) {
+            this.ctx.fillText(text, centerX, centerY);
+            return;
+        }
 
+        const radius = Math.abs(curveLevel) * 2; // Adjusted multiplier
+        const totalAngle = Math.PI; // Spread across 180 degrees
+        const angleStep = totalAngle / (text.length - 1);
+        const startAngle = curveLevel > 0 ? Math.PI - totalAngle / 2 : totalAngle / 2;
+
+        for (let i = 0; i < text.length; i++) {
+            const angle = startAngle + (i * angleStep * (curveLevel > 0 ? -1 : 1));
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+
+            this.ctx.save();
+            this.ctx.translate(x, y);
+            this.ctx.rotate(angle + Math.PI / 2);
+            this.ctx.fillText(text[i], 0, 0);
+            this.ctx.restore();
+        }
+    }
 
     addText() {
         const textInput = document.getElementById('textInput');
         const fontFamily = document.getElementById('fontFamily').value;
+        const textColor = document.getElementById('textColor').value;
 
         if (textInput.value.trim()) {
             let x, y;
@@ -292,9 +351,10 @@ class StampDesigner {
             const textElement = {
                 text: textInput.value,
                 fontFamily: fontFamily,
-                color: '#000000',
+                color: textColor,
                 x: x,
-                y: y
+                y: y,
+                curve: 0 // Curve level (-100 to 100)
             };
 
             this.textElements.push(textElement);
@@ -380,6 +440,7 @@ class StampDesigner {
                 this.dragOffset.x = x - shape.x;
                 this.dragOffset.y = y - shape.y;
                 this.updateUIForSelectedShape();
+                this.updateLayerList();
                 this.drawStamp();
                 return;
             }
@@ -398,6 +459,7 @@ class StampDesigner {
                 this.dragOffset.x = x - textElement.x;
                 this.dragOffset.y = y - textElement.y;
                 this.updateUIForSelectedShape();
+                this.updateLayerList();
                 this.drawStamp();
                 return;
             }
@@ -407,6 +469,7 @@ class StampDesigner {
         this.selectedElement = null;
         this.selectedShape = null;
         this.updateUIForSelectedShape();
+        this.updateLayerList();
         this.drawStamp();
     }
 
@@ -588,147 +651,8 @@ class StampDesigner {
         }
     }
 
-    saveDesign() {
-        const designName = document.getElementById('designName').value.trim() || 'Untitled Design';
-        const designData = {
-            shapes: this.shapes,
-            textElements: this.textElements,
-            frames: this.frames,
-            images: this.images.map(img => ({
-                src: img.img.src,
-                x: img.x,
-                y: img.y,
-                width: img.width,
-                height: img.height
-            })),
-            borderThickness: this.borderThickness,
-            timestamp: new Date().toISOString()
-        };
-
-        this.savedDesigns[designName] = designData;
-        localStorage.setItem('stampDesigns', JSON.stringify(this.savedDesigns));
-        alert(`Design "${designName}" saved successfully!`);
-    }
-
-    loadDesign() {
-        const designNames = Object.keys(this.savedDesigns);
-        if (designNames.length === 0) {
-            alert('No saved designs found.');
-            return;
-        }
-
-        const designName = prompt(`Enter design name to load:\nAvailable designs: ${designNames.join(', ')}`);
-        if (!designName || !this.savedDesigns[designName]) {
-            alert('Design not found.');
-            return;
-        }
-
-        const designData = this.savedDesigns[designName];
-        
-        // Handle both new format (shapes array) and old format (single shape properties)
-        if (designData.shapes) {
-            // New format
-            this.shapes = designData.shapes;
-        } else {
-            // Old format - convert to shapes array
-            this.shapes = [{
-                type: designData.currentShape,
-                x: this.canvas.width / 2,
-                y: this.canvas.height / 2,
-                width: designData.width,
-                height: designData.height,
-                color: designData.color,
-                isFilled: true // Default for old designs
-            }];
-        }
-        
-        this.textElements = designData.textElements || [];
-        this.frames = designData.frames || [];
-        this.borderThickness = designData.borderThickness || 2;
-
-        // Load images
-        this.images = [];
-        if (designData.images) {
-            designData.images.forEach(imgData => {
-                const img = new Image();
-                img.onload = () => {
-                    this.images.push({
-                        img: img,
-                        x: imgData.x,
-                        y: imgData.y,
-                        width: imgData.width,
-                        height: imgData.height
-                    });
-                    this.drawStamp();
-                };
-                img.src = imgData.src;
-            });
-        }
-
-        // Reset selection
-        this.selectedShape = null;
-        this.selectedElement = null;
-
-        // Update UI
-        this.updateUIForSelectedShape();
-        document.getElementById('designName').value = designName;
-        this.drawStamp();
-        alert(`Design "${designName}" loaded successfully!`);
-    }
-
     clearCanvas() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-
-    saveDesign() {
-        const designName = document.getElementById('designName').value.trim() || 'Untitled Design';
-        const designData = {
-            currentShape: this.currentShape,
-            width: this.width,
-            height: this.height,
-            color: this.color,
-            isFilled: this.isFilled,
-            shapePosition: this.shapePosition,
-            textElements: this.textElements,
-            timestamp: new Date().toISOString()
-        };
-
-        this.savedDesigns[designName] = designData;
-        localStorage.setItem('stampDesigns', JSON.stringify(this.savedDesigns));
-        alert(`Design "${designName}" saved successfully!`);
-    }
-
-    loadDesign() {
-        const designNames = Object.keys(this.savedDesigns);
-        if (designNames.length === 0) {
-            alert('No saved designs found.');
-            return;
-        }
-
-        const designName = prompt(`Enter design name to load:\nAvailable designs: ${designNames.join(', ')}`);
-        if (!designName || !this.savedDesigns[designName]) {
-            alert('Design not found.');
-            return;
-        }
-
-        const designData = this.savedDesigns[designName];
-        this.currentShape = designData.currentShape;
-        this.width = designData.width;
-        this.height = designData.height;
-        this.color = designData.color;
-        this.isFilled = designData.isFilled !== undefined ? designData.isFilled : true; // Default to true for backward compatibility
-        this.shapePosition = designData.shapePosition || { x: this.canvas.width / 2, y: this.canvas.height / 2 };
-        this.textElements = designData.textElements || [];
-
-        // Update UI
-        document.getElementById('stampColor').value = this.color;
-        document.getElementById('fillToggle').checked = this.isFilled;
-        document.getElementById('widthSlider').value = this.width;
-        document.getElementById('heightSlider').value = this.height;
-        document.getElementById('designName').value = designName;
-        this.updateSizeDisplay();
-        this.drawStamp();
-        alert(`Design "${designName}" loaded successfully!`);
     }
 
     exportStamp(format = 'png') {
