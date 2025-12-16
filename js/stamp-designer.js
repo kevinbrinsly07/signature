@@ -62,6 +62,7 @@ class StampDesigner {
         document.getElementById('fillToggle').addEventListener('change', (e) => {
             if (this.selectedShape !== null) {
                 this.shapes[this.selectedShape].isFilled = e.target.checked;
+                this.updateUIForSelectedShape(); // Update UI to show/hide border controls
                 this.drawStamp();
             }
         });
@@ -127,6 +128,36 @@ class StampDesigner {
             }
         });
 
+        // Border thickness controls
+        document.getElementById('borderThickness').addEventListener('input', (e) => {
+            if (this.selectedShape !== null) {
+                this.shapes[this.selectedShape].borderThickness = parseInt(e.target.value);
+                this.drawStamp();
+            }
+        });
+
+        document.getElementById('decreaseBorder').addEventListener('click', () => {
+            if (this.selectedShape !== null) {
+                const currentThickness = this.shapes[this.selectedShape].borderThickness || 2;
+                if (currentThickness > 1) {
+                    this.shapes[this.selectedShape].borderThickness = currentThickness - 1;
+                    document.getElementById('borderThickness').value = this.shapes[this.selectedShape].borderThickness;
+                    this.drawStamp();
+                }
+            }
+        });
+
+        document.getElementById('increaseBorder').addEventListener('click', () => {
+            if (this.selectedShape !== null) {
+                const currentThickness = this.shapes[this.selectedShape].borderThickness || 2;
+                if (currentThickness < 20) {
+                    this.shapes[this.selectedShape].borderThickness = currentThickness + 1;
+                    document.getElementById('borderThickness').value = this.shapes[this.selectedShape].borderThickness;
+                    this.drawStamp();
+                }
+            }
+        });
+
         // Export button
         document.getElementById('exportPNG').addEventListener('click', () => {
             this.exportStamp('png');
@@ -185,6 +216,7 @@ class StampDesigner {
             height: 300, 
             color: '#000000', // Black color for stamp designs
             isFilled: true,
+            borderThickness: 2,
             x: this.canvas.width / 2 + (this.shapes.length * 80), // Increased offset for larger shapes
             y: this.canvas.height / 2 + (this.shapes.length * 80)
         };
@@ -204,12 +236,24 @@ class StampDesigner {
             document.getElementById('heightValue').textContent = shape.height + 'mm';
             document.getElementById('stampColor').value = shape.color;
             document.getElementById('fillToggle').checked = shape.isFilled;
+            document.getElementById('borderThickness').value = shape.borderThickness || 2;
             
             // Enable shape controls
             document.getElementById('widthSlider').disabled = false;
             document.getElementById('heightSlider').disabled = false;
             document.getElementById('stampColor').disabled = false;
             document.getElementById('fillToggle').disabled = false;
+            
+            // Border thickness controls - only enabled for hollow shapes
+            if (shape.isFilled) {
+                document.getElementById('borderThickness').disabled = true;
+                document.getElementById('decreaseBorder').disabled = true;
+                document.getElementById('increaseBorder').disabled = true;
+            } else {
+                document.getElementById('borderThickness').disabled = false;
+                document.getElementById('decreaseBorder').disabled = false;
+                document.getElementById('increaseBorder').disabled = false;
+            }
             
             // Disable text controls
             document.getElementById('curveSlider').disabled = true;
@@ -232,12 +276,18 @@ class StampDesigner {
             document.getElementById('heightSlider').disabled = true;
             document.getElementById('stampColor').disabled = true;
             document.getElementById('fillToggle').disabled = true;
+            document.getElementById('borderThickness').disabled = true;
+            document.getElementById('decreaseBorder').disabled = true;
+            document.getElementById('increaseBorder').disabled = true;
         } else {
             // Disable all controls when nothing is selected
             document.getElementById('widthSlider').disabled = true;
             document.getElementById('heightSlider').disabled = true;
             document.getElementById('stampColor').disabled = true;
             document.getElementById('fillToggle').disabled = true;
+            document.getElementById('borderThickness').disabled = true;
+            document.getElementById('decreaseBorder').disabled = true;
+            document.getElementById('increaseBorder').disabled = true;
             document.getElementById('curveSlider').disabled = true;
             document.getElementById('textColor').disabled = true;
             document.getElementById('fontSize').disabled = true;
@@ -258,7 +308,7 @@ class StampDesigner {
 
             this.ctx.fillStyle = shape.color;
             this.ctx.strokeStyle = shape.color;
-            this.ctx.lineWidth = 2;
+            this.ctx.lineWidth = shape.borderThickness || 2;
 
             switch (shape.type) {
                 case 'circle':
@@ -721,7 +771,7 @@ class StampDesigner {
 
             ctx.fillStyle = shape.color;
             ctx.strokeStyle = shape.color;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = shape.borderThickness || 2;
 
             switch (shape.type) {
                 case 'circle':

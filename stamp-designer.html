@@ -138,6 +138,15 @@
                             <label for="fillToggle" class="text-sm text-gray-300">Filled Shape</label>
                         </div>
                         <p class="text-xs text-gray-400 mt-1">Uncheck for hollow shape with border only</p>
+                        <div class="mt-3">
+                            <label class="text-sm text-gray-300">Border Thickness:</label>
+                            <div class="flex items-center space-x-2">
+                                <button id="decreaseBorder" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">-</button>
+                                <input type="number" id="borderThickness" value="2" min="1" max="20" class="w-16 bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-center focus:outline-none focus:border-red-400">
+                                <button id="increaseBorder" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">+</button>
+                                <span class="text-sm text-red-400">px</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Text Management -->
