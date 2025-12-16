@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Page Title -->
-    <title>Signature Capture App</title>
+    <title>Digital Tools Suite</title>
     <!-- External CSS and JS libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -28,12 +28,32 @@
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
             border: none;
         }
+        #stampCanvas {
+            cursor: crosshair;
+        }
+        .tool-panel {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <!-- Body Section: Main content of the page -->
 <body class="font-sans bg-gradient-to-br from-gray-900 to-black min-h-screen flex flex-col items-center justify-center p-5">
     <!-- Main Container -->
     <div class="lg:p-8 w-full max-w-7xl">
+        <!-- Navigation -->
+        <nav class="mb-8">
+            <ul class="flex justify-center space-x-4">
+                <li><a href="index.html" class="text-gray-200 hover:text-blue-400 transition duration-300">Signature Capture</a></li>
+                <li><a href="stamp-designer.html" class="text-gray-200 hover:text-blue-400 transition duration-300">Stamp Designer</a></li>
+            </ul>
+        </nav>
         <!-- Header -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-700 to-purple-800 rounded-full mb-2">
@@ -115,6 +135,11 @@
             <button id="fullscreenBtn" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                 <i class="fas fa-expand mr-2"></i>Full Screen
             </button>
+            <a href="stamp-designer.html">
+                <button class="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <i class="fas fa-stamp mr-2"></i>Stamp Generator
+                </button>
+            </a>
         </div>
 
         <!-- Instructions -->
