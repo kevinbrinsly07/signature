@@ -162,6 +162,15 @@
                                 <input type="color" id="textColor" value="#000000" class="w-full h-10 border-2 border-yellow-500 rounded-lg cursor-pointer shadow-inner">
                             </div>
                             <div>
+                                <label class="text-sm text-gray-300">Font Size:</label>
+                                <div class="flex items-center space-x-2">
+                                    <button id="decreaseFontSize" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">-</button>
+                                    <input type="number" id="fontSize" value="16" min="8" max="72" class="w-16 bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-center focus:outline-none focus:border-yellow-400">
+                                    <button id="increaseFontSize" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">+</button>
+                                    <span class="text-sm text-yellow-400">px</span>
+                                </div>
+                            </div>
+                            <div>
                                 <label class="text-sm text-gray-300">Curve Level:</label>
                                 <input type="range" id="curveSlider" min="-100" max="100" value="0" class="w-full h-3 bg-gradient-to-r from-yellow-400 to-yellow-700 rounded-lg appearance-none cursor-pointer slider-thumb">
                                 <span id="curveValue" class="text-sm text-yellow-400">0</span>

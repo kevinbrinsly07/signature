@@ -97,6 +97,36 @@ class StampDesigner {
             }
         });
 
+        // Font size controls
+        document.getElementById('fontSize').addEventListener('input', (e) => {
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.fontSize = parseInt(e.target.value);
+                this.drawStamp();
+            }
+        });
+
+        document.getElementById('decreaseFontSize').addEventListener('click', () => {
+            if (this.selectedElement && this.selectedElement.text) {
+                const currentSize = this.selectedElement.fontSize || 16;
+                if (currentSize > 8) {
+                    this.selectedElement.fontSize = currentSize - 2;
+                    document.getElementById('fontSize').value = this.selectedElement.fontSize;
+                    this.drawStamp();
+                }
+            }
+        });
+
+        document.getElementById('increaseFontSize').addEventListener('click', () => {
+            if (this.selectedElement && this.selectedElement.text) {
+                const currentSize = this.selectedElement.fontSize || 16;
+                if (currentSize < 72) {
+                    this.selectedElement.fontSize = currentSize + 2;
+                    document.getElementById('fontSize').value = this.selectedElement.fontSize;
+                    this.drawStamp();
+                }
+            }
+        });
+
         // Export button
         document.getElementById('exportPNG').addEventListener('click', () => {
             this.exportStamp('png');
@@ -188,10 +218,14 @@ class StampDesigner {
             document.getElementById('curveSlider').value = this.selectedElement.curve || 0;
             document.getElementById('curveValue').textContent = this.selectedElement.curve || 0;
             document.getElementById('textColor').value = this.selectedElement.color || '#000000';
+            document.getElementById('fontSize').value = this.selectedElement.fontSize || 16;
             
             // Enable text controls
             document.getElementById('curveSlider').disabled = false;
             document.getElementById('textColor').disabled = false;
+            document.getElementById('fontSize').disabled = false;
+            document.getElementById('decreaseFontSize').disabled = false;
+            document.getElementById('increaseFontSize').disabled = false;
             
             // Disable shape controls
             document.getElementById('widthSlider').disabled = true;
@@ -206,6 +240,9 @@ class StampDesigner {
             document.getElementById('fillToggle').disabled = true;
             document.getElementById('curveSlider').disabled = true;
             document.getElementById('textColor').disabled = true;
+            document.getElementById('fontSize').disabled = true;
+            document.getElementById('decreaseFontSize').disabled = true;
+            document.getElementById('increaseFontSize').disabled = true;
         }
         this.updateSizeDisplay();
     }
@@ -281,7 +318,7 @@ class StampDesigner {
         for (let i = this.textElements.length - 1; i >= 0; i--) {
             const textElement = this.textElements[i];
             this.ctx.fillStyle = textElement.color || '#000000';
-            this.ctx.font = `16px ${textElement.fontFamily}`;
+            this.ctx.font = `${textElement.fontSize || 16}px ${textElement.fontFamily}`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
 
@@ -335,6 +372,7 @@ class StampDesigner {
         const textInput = document.getElementById('textInput');
         const fontFamily = document.getElementById('fontFamily').value;
         const textColor = document.getElementById('textColor').value;
+        const fontSize = parseInt(document.getElementById('fontSize').value);
 
         if (textInput.value.trim()) {
             let x, y;
@@ -352,6 +390,7 @@ class StampDesigner {
                 text: textInput.value,
                 fontFamily: fontFamily,
                 color: textColor,
+                fontSize: fontSize,
                 x: x,
                 y: y,
                 curve: 0 // Curve level (-100 to 100)
@@ -418,7 +457,7 @@ class StampDesigner {
         // If we have selected text, prioritize dragging it
         if (this.selectedElement && this.selectedElement !== 'shape') {
             const textElement = this.selectedElement;
-            this.ctx.font = `16px ${textElement.fontFamily}`;
+            this.ctx.font = `${textElement.fontSize || 16}px ${textElement.fontFamily}`;
             const metrics = this.ctx.measureText(textElement.text);
             if (x >= textElement.x - metrics.width / 2 && x <= textElement.x + metrics.width / 2 &&
                 y >= textElement.y - 8 && y <= textElement.y + 8) {
@@ -449,7 +488,7 @@ class StampDesigner {
         // Check if clicking on text elements
         for (let textElement of this.textElements) {
             // Set the font to match how it's drawn
-            this.ctx.font = `16px ${textElement.fontFamily}`;
+            this.ctx.font = `${textElement.fontSize || 16}px ${textElement.fontFamily}`;
             const metrics = this.ctx.measureText(textElement.text);
             if (x >= textElement.x - metrics.width / 2 && x <= textElement.x + metrics.width / 2 &&
                 y >= textElement.y - 8 && y <= textElement.y + 8) {
@@ -738,7 +777,7 @@ class StampDesigner {
         for (let i = this.textElements.length - 1; i >= 0; i--) {
             const textElement = this.textElements[i];
             ctx.fillStyle = textElement.color || '#000000';
-            ctx.font = `16px ${textElement.fontFamily}`;
+            ctx.font = `${textElement.fontSize || 16}px ${textElement.fontFamily}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(textElement.text, textElement.x, textElement.y);
