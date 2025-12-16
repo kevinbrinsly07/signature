@@ -382,7 +382,7 @@ class StampDesigner {
             }
 
             // Draw selection border if selected
-            if (this.selectedElement === textElement && (!textElement.curve || textElement.curve === 0)) {
+            if (this.selectedElement === textElement) {
                 const metrics = this.ctx.measureText(textElement.text);
                 const height = 16;
                 this.ctx.strokeStyle = '#fbbf24';
@@ -415,6 +415,30 @@ class StampDesigner {
             this.ctx.rotate(angle + Math.PI / 2);
             this.ctx.fillText(text[i], 0, 0);
             this.ctx.restore();
+        }
+    }
+
+    drawCurvedTextToContext(ctx, text, centerX, centerY, curveLevel) {
+        if (curveLevel === 0) {
+            ctx.fillText(text, centerX, centerY);
+            return;
+        }
+
+        const radius = Math.abs(curveLevel) * 2; // Adjusted multiplier
+        const totalAngle = Math.PI; // Spread across 180 degrees
+        const angleStep = totalAngle / (text.length - 1);
+        const startAngle = curveLevel > 0 ? Math.PI - totalAngle / 2 : totalAngle / 2;
+
+        for (let i = 0; i < text.length; i++) {
+            const angle = startAngle + (i * angleStep * (curveLevel > 0 ? -1 : 1));
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle + Math.PI / 2);
+            ctx.fillText(text[i], 0, 0);
+            ctx.restore();
         }
     }
 
@@ -535,8 +559,9 @@ class StampDesigner {
             }
         }
 
-        // Check if clicking on text elements
-        for (let textElement of this.textElements) {
+        // Check if clicking on text elements (in reverse order so top text is selected first)
+        for (let i = this.textElements.length - 1; i >= 0; i--) {
+            const textElement = this.textElements[i];
             // Set the font to match how it's drawn
             this.ctx.font = `${textElement.fontSize || 16}px ${textElement.fontFamily}`;
             const metrics = this.ctx.measureText(textElement.text);
@@ -754,7 +779,10 @@ class StampDesigner {
         canvas.height = this.canvas.height * scale;
         ctx.scale(scale, scale);
 
-        // Skip white background for transparent PNG
+        // Fill with white background to match the canvas appearance
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
         // Draw the stamp design
         this.renderToContext(ctx);
 
@@ -827,7 +855,15 @@ class StampDesigner {
             ctx.font = `${textElement.fontSize || 16}px ${textElement.fontFamily}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(textElement.text, textElement.x, textElement.y);
+
+            const x = textElement.x || this.canvas.width / 2;
+            const y = textElement.y || (this.canvas.height / 2 + (i * 30));
+
+            if (textElement.curve && textElement.curve !== 0) {
+                this.drawCurvedTextToContext(ctx, textElement.text, x, y, textElement.curve);
+            } else {
+                ctx.fillText(textElement.text, x, y);
+            }
         }
     }
 
