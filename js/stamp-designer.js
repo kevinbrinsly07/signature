@@ -9,6 +9,7 @@ class StampDesigner {
         this.isDragging = false;
         this.dragOffset = { x: 0, y: 0 };
         this.scale = 1; // Scale factor for rendering
+        this.clipboard = null; // Store copied element
 
         this.init();
         this.bindEvents();
@@ -86,6 +87,15 @@ class StampDesigner {
             if (this.selectedElement && this.selectedElement.text) {
                 this.selectedElement.curve = parseInt(e.target.value);
                 document.getElementById('curveValue').textContent = this.selectedElement.curve;
+                this.drawStamp();
+            }
+        });
+
+        // Letter spacing slider
+        document.getElementById('letterSpacingSlider').addEventListener('input', (e) => {
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.letterSpacing = parseInt(e.target.value);
+                document.getElementById('letterSpacingValue').textContent = this.selectedElement.letterSpacing;
                 this.drawStamp();
             }
         });
@@ -174,10 +184,18 @@ class StampDesigner {
         this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
         this.canvas.addEventListener('mouseleave', (e) => this.handleMouseUp(e));
 
-        // Keyboard events for deletion
+        // Keyboard events for deletion, copy, and paste
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 this.deleteSelectedElement();
+            } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+                // Copy (Ctrl+C or Cmd+C)
+                e.preventDefault();
+                this.copySelectedElement();
+            } else if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+                // Paste (Ctrl+V or Cmd+V)
+                e.preventDefault();
+                this.pasteElement();
             }
         });
 
@@ -261,11 +279,14 @@ class StampDesigner {
             // Text element selected
             document.getElementById('curveSlider').value = this.selectedElement.curve || 0;
             document.getElementById('curveValue').textContent = this.selectedElement.curve || 0;
+            document.getElementById('letterSpacingSlider').value = this.selectedElement.letterSpacing || 0;
+            document.getElementById('letterSpacingValue').textContent = this.selectedElement.letterSpacing || 0;
             document.getElementById('textColor').value = this.selectedElement.color || '#000000';
             document.getElementById('fontSize').value = this.selectedElement.fontSize || 16;
             
             // Enable text controls
             document.getElementById('curveSlider').disabled = false;
+            document.getElementById('letterSpacingSlider').disabled = false;
             document.getElementById('textColor').disabled = false;
             document.getElementById('fontSize').disabled = false;
             document.getElementById('decreaseFontSize').disabled = false;
@@ -289,6 +310,7 @@ class StampDesigner {
             document.getElementById('decreaseBorder').disabled = true;
             document.getElementById('increaseBorder').disabled = true;
             document.getElementById('curveSlider').disabled = true;
+            document.getElementById('letterSpacingSlider').disabled = true;
             document.getElementById('textColor').disabled = true;
             document.getElementById('fontSize').disabled = true;
             document.getElementById('decreaseFontSize').disabled = true;
@@ -376,7 +398,7 @@ class StampDesigner {
             const y = textElement.y || (this.canvas.height / 2 + (i * 30));
 
             if (textElement.curve && textElement.curve !== 0) {
-                this.drawCurvedText(textElement.text, x, y, textElement.curve);
+                this.drawCurvedText(textElement.text, x, y, textElement.curve, textElement.letterSpacing);
             } else {
                 this.ctx.fillText(textElement.text, x, y);
             }
@@ -394,19 +416,20 @@ class StampDesigner {
         this.updateLayerList();
     }
 
-    drawCurvedText(text, centerX, centerY, curveLevel) {
+    drawCurvedText(text, centerX, centerY, curveLevel, letterSpacing = 0) {
         if (curveLevel === 0) {
             this.ctx.fillText(text, centerX, centerY);
             return;
         }
 
         const radius = Math.abs(curveLevel) * 2; // Adjusted multiplier
-        const totalAngle = Math.PI; // Spread across 180 degrees
-        const angleStep = totalAngle / (text.length - 1);
-        const startAngle = curveLevel > 0 ? Math.PI - totalAngle / 2 : totalAngle / 2;
+        const totalAngle = 2 * Math.PI; // Spread across 360 degrees
+        const baseAngleStep = totalAngle / text.length;
+        const angleStep = baseAngleStep + (letterSpacing * Math.PI / 180); // Convert letter spacing to radians
+        const startAngle = curveLevel > 0 ? Math.PI : 0; // Start from bottom for positive curve, top for negative
 
         for (let i = 0; i < text.length; i++) {
-            const angle = startAngle + (i * angleStep * (curveLevel > 0 ? -1 : 1));
+            const angle = startAngle + (i * angleStep * (curveLevel > 0 ? 1 : -1));
             const x = centerX + Math.cos(angle) * radius;
             const y = centerY + Math.sin(angle) * radius;
 
@@ -418,19 +441,20 @@ class StampDesigner {
         }
     }
 
-    drawCurvedTextToContext(ctx, text, centerX, centerY, curveLevel) {
+    drawCurvedTextToContext(ctx, text, centerX, centerY, curveLevel, letterSpacing = 0) {
         if (curveLevel === 0) {
             ctx.fillText(text, centerX, centerY);
             return;
         }
 
         const radius = Math.abs(curveLevel) * 2; // Adjusted multiplier
-        const totalAngle = Math.PI; // Spread across 180 degrees
-        const angleStep = totalAngle / (text.length - 1);
-        const startAngle = curveLevel > 0 ? Math.PI - totalAngle / 2 : totalAngle / 2;
+        const totalAngle = 2 * Math.PI; // Spread across 360 degrees
+        const baseAngleStep = totalAngle / text.length;
+        const angleStep = baseAngleStep + (letterSpacing * Math.PI / 180); // Convert letter spacing to radians
+        const startAngle = curveLevel > 0 ? Math.PI : 0; // Start from bottom for positive curve, top for negative
 
         for (let i = 0; i < text.length; i++) {
-            const angle = startAngle + (i * angleStep * (curveLevel > 0 ? -1 : 1));
+            const angle = startAngle + (i * angleStep * (curveLevel > 0 ? 1 : -1));
             const x = centerX + Math.cos(angle) * radius;
             const y = centerY + Math.sin(angle) * radius;
 
@@ -467,7 +491,8 @@ class StampDesigner {
                 fontSize: fontSize,
                 x: x,
                 y: y,
-                curve: 0 // Curve level (-100 to 100)
+                curve: 0, // Curve level (-100 to 100)
+                letterSpacing: 0 // Letter spacing (-50 to 50)
             };
 
             this.textElements.push(textElement);
@@ -623,6 +648,48 @@ class StampDesigner {
             this.updateUIForSelectedShape();
             this.drawStamp();
         }
+    }
+
+    copySelectedElement() {
+        if (this.selectedElement === 'shape' && this.selectedShape !== null) {
+            // Copy shape
+            this.clipboard = {
+                type: 'shape',
+                data: JSON.parse(JSON.stringify(this.shapes[this.selectedShape]))
+            };
+        } else if (this.selectedElement && this.selectedElement !== 'shape') {
+            // Copy text element
+            this.clipboard = {
+                type: 'text',
+                data: JSON.parse(JSON.stringify(this.selectedElement))
+            };
+        }
+    }
+
+    pasteElement() {
+        if (!this.clipboard) return;
+
+        if (this.clipboard.type === 'shape') {
+            // Paste shape with slight offset
+            const newShape = JSON.parse(JSON.stringify(this.clipboard.data));
+            newShape.x += 20; // Offset by 20 pixels
+            newShape.y += 20;
+            this.shapes.push(newShape);
+            this.selectedShape = this.shapes.length - 1;
+            this.selectedElement = 'shape';
+        } else if (this.clipboard.type === 'text') {
+            // Paste text element with slight offset
+            const newTextElement = JSON.parse(JSON.stringify(this.clipboard.data));
+            newTextElement.x += 20; // Offset by 20 pixels
+            newTextElement.y += 20;
+            this.textElements.push(newTextElement);
+            this.selectedElement = newTextElement;
+            this.selectedShape = null;
+        }
+
+        this.updateUIForSelectedShape();
+        this.updateLayerList();
+        this.drawStamp();
     }
 
     updateLayerList() {
@@ -860,7 +927,7 @@ class StampDesigner {
             const y = textElement.y || (this.canvas.height / 2 + (i * 30));
 
             if (textElement.curve && textElement.curve !== 0) {
-                this.drawCurvedTextToContext(ctx, textElement.text, x, y, textElement.curve);
+                this.drawCurvedTextToContext(ctx, textElement.text, x, y, textElement.curve, textElement.letterSpacing);
             } else {
                 ctx.fillText(textElement.text, x, y);
             }
@@ -879,6 +946,7 @@ class StampDesigner {
         this.textElements = [];
         this.selectedShape = null;
         this.selectedElement = null;
+        this.clipboard = null; // Clear clipboard
         this.updateUIForSelectedShape();
         this.drawStamp();
     }
