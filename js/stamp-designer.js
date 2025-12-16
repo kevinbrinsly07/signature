@@ -704,10 +704,7 @@ class StampDesigner {
         canvas.height = this.canvas.height * scale;
         ctx.scale(scale, scale);
 
-        // Draw white background
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
+        // Skip white background for transparent PNG
         // Draw the stamp design
         this.renderToContext(ctx);
 
