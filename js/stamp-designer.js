@@ -117,6 +117,82 @@ class StampDesigner {
             }
         });
 
+        // Text style buttons
+        document.getElementById('boldBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.target.classList.toggle('bg-yellow-600');
+            e.target.classList.toggle('bg-gray-600');
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.bold = e.target.classList.contains('bg-yellow-600');
+                this.drawStamp();
+            }
+        });
+
+        document.getElementById('italicBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.target.classList.toggle('bg-yellow-600');
+            e.target.classList.toggle('bg-gray-600');
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.italic = e.target.classList.contains('bg-yellow-600');
+                this.drawStamp();
+            }
+        });
+
+        // Text effect checkboxes
+        document.getElementById('textOutline').addEventListener('change', (e) => {
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.outline = e.target.checked;
+                this.updateOutlineControls();
+                this.drawStamp();
+            }
+        });
+
+        document.getElementById('textShadow').addEventListener('change', (e) => {
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.shadow = e.target.checked;
+                this.drawStamp();
+            }
+        });
+
+        // Outline color picker
+        document.getElementById('outlineColor').addEventListener('input', (e) => {
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.outlineColor = e.target.value;
+                this.drawStamp();
+            }
+        });
+
+        // Text alignment buttons
+        document.querySelectorAll('.align-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Remove active class from all alignment buttons
+                document.querySelectorAll('.align-btn').forEach(b => {
+                    b.classList.remove('bg-yellow-600');
+                    b.classList.add('bg-gray-600');
+                });
+                // Add active class to clicked button
+                e.target.classList.remove('bg-gray-600');
+                e.target.classList.add('bg-yellow-600');
+
+                if (this.selectedElement && this.selectedElement.text) {
+                    const alignment = e.target.id.replace('align', '').toLowerCase();
+                    this.selectedElement.alignment = alignment;
+                    this.drawStamp();
+                }
+            });
+        });
+
+        // Text rotation slider
+        document.getElementById('textRotation').addEventListener('input', (e) => {
+            const rotation = parseInt(e.target.value);
+            document.getElementById('rotationValue').textContent = rotation + '°';
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.rotation = rotation;
+                this.drawStamp();
+            }
+        });
+
         // Letter spacing slider
         document.getElementById('letterSpacingSlider').addEventListener('input', (e) => {
             if (this.selectedElement && this.selectedElement.text) {
@@ -240,6 +316,16 @@ class StampDesigner {
         });
     }
 
+    updateOutlineControls() {
+        const outlineSection = document.getElementById('outlineColorSection');
+        const textOutline = document.getElementById('textOutline');
+        if (this.selectedElement && this.selectedElement.text && this.selectedElement.outline) {
+            outlineSection.style.display = 'block';
+        } else {
+            outlineSection.style.display = 'none';
+        }
+    }
+
     updateSizeDisplay() {
         const display = document.getElementById('sizeDisplay');
         if (this.selectedShape !== null) {
@@ -325,14 +411,51 @@ class StampDesigner {
             document.getElementById('letterSpacingValue').textContent = this.selectedElement.letterSpacing || 0;
             document.getElementById('textColor').value = this.selectedElement.color || '#000000';
             document.getElementById('fontSize').value = this.selectedElement.fontSize || 16;
-            
+            document.getElementById('textRotation').value = this.selectedElement.rotation || 0;
+            document.getElementById('rotationValue').textContent = (this.selectedElement.rotation || 0) + '°';
+            document.getElementById('textOutline').checked = this.selectedElement.outline || false;
+            document.getElementById('textShadow').checked = this.selectedElement.shadow || false;
+            document.getElementById('outlineColor').value = this.selectedElement.outlineColor || '#ffffff';
+
+            // Update bold/italic buttons
+            const boldBtn = document.getElementById('boldBtn');
+            const italicBtn = document.getElementById('italicBtn');
+            if (this.selectedElement.bold) {
+                boldBtn.classList.add('bg-yellow-600');
+                boldBtn.classList.remove('bg-gray-600');
+            } else {
+                boldBtn.classList.remove('bg-yellow-600');
+                boldBtn.classList.add('bg-gray-600');
+            }
+            if (this.selectedElement.italic) {
+                italicBtn.classList.add('bg-yellow-600');
+                italicBtn.classList.remove('bg-gray-600');
+            } else {
+                italicBtn.classList.remove('bg-yellow-600');
+                italicBtn.classList.add('bg-gray-600');
+            }
+
+            // Update alignment buttons
+            document.querySelectorAll('.align-btn').forEach(btn => {
+                btn.classList.remove('bg-yellow-600');
+                btn.classList.add('bg-gray-600');
+            });
+            const alignBtn = document.getElementById('align' + (this.selectedElement.alignment || 'center').charAt(0).toUpperCase() + (this.selectedElement.alignment || 'center').slice(1));
+            if (alignBtn) {
+                alignBtn.classList.remove('bg-gray-600');
+                alignBtn.classList.add('bg-yellow-600');
+            }
+
             // Show text controls
             document.getElementById('curveControl').style.display = 'block';
             document.getElementById('letterSpacingControl').style.display = 'block';
+            document.getElementById('rotationControl').style.display = 'block';
+            this.updateOutlineControls();
             
             // Enable text controls
             document.getElementById('curveSlider').disabled = false;
             document.getElementById('letterSpacingSlider').disabled = false;
+            document.getElementById('textRotation').disabled = false;
             document.getElementById('textColor').disabled = false;
             document.getElementById('fontSize').disabled = false;
             document.getElementById('decreaseFontSize').disabled = false;
@@ -363,8 +486,10 @@ class StampDesigner {
             // Hide text controls
             document.getElementById('curveControl').style.display = 'none';
             document.getElementById('letterSpacingControl').style.display = 'none';
+            document.getElementById('rotationControl').style.display = 'none';
             document.getElementById('curveSlider').disabled = true;
             document.getElementById('letterSpacingSlider').disabled = true;
+            document.getElementById('textRotation').disabled = true;
             document.getElementById('textColor').disabled = true;
             document.getElementById('fontSize').disabled = true;
             document.getElementById('decreaseFontSize').disabled = true;
@@ -558,24 +683,45 @@ class StampDesigner {
         // Draw text elements in reverse order (last added on top)
         for (let i = this.textElements.length - 1; i >= 0; i--) {
             const textElement = this.textElements[i];
-            this.ctx.fillStyle = textElement.color || '#000000';
-            this.ctx.font = `${textElement.fontSize || 16}px ${textElement.fontFamily}`;
-            this.ctx.textAlign = 'center';
+
+            // Build font string with bold and italic
+            let fontWeight = '';
+            if (textElement.bold) fontWeight += 'bold ';
+            if (textElement.italic) fontWeight += 'italic ';
+            this.ctx.font = `${fontWeight}${textElement.fontSize || 16}px ${textElement.fontFamily}`;
+
+            // Set text alignment
+            this.ctx.textAlign = textElement.alignment || 'center';
             this.ctx.textBaseline = 'middle';
 
             const x = textElement.x || this.canvas.width / 2;
             const y = textElement.y || (this.canvas.height / 2 + (i * 30));
 
-            if (textElement.curve && textElement.curve !== 0) {
-                this.drawCurvedText(textElement.text, x, y, textElement.curve, textElement.letterSpacing);
-            } else {
-                this.ctx.fillText(textElement.text, x, y);
+            // Save context for rotation
+            this.ctx.save();
+
+            // Apply rotation if needed
+            if (textElement.rotation && textElement.rotation !== 0) {
+                this.ctx.translate(x, y);
+                this.ctx.rotate((textElement.rotation * Math.PI) / 180);
+                this.ctx.translate(-x, -y);
             }
+
+            // Draw text with effects
+            if (textElement.curve && textElement.curve !== 0) {
+                // Curved text with effects
+                this.drawCurvedTextWithEffects(textElement, x, y);
+            } else {
+                // Regular text with effects
+                this.drawTextWithEffects(textElement, x, y);
+            }
+
+            this.ctx.restore();
 
             // Draw selection border if selected
             if (this.selectedElement === textElement) {
                 const metrics = this.ctx.measureText(textElement.text);
-                const height = 16;
+                const height = textElement.fontSize || 16;
                 this.ctx.strokeStyle = '#fbbf24';
                 this.ctx.lineWidth = 2;
                 this.ctx.strokeRect(x - metrics.width / 2 - 2, y - height / 2 - 2, metrics.width + 4, height + 4);
@@ -635,11 +781,110 @@ class StampDesigner {
         }
     }
 
+    drawTextWithEffects(textElement, x, y) {
+        const text = textElement.text;
+        const color = textElement.color || '#000000';
+
+        // Draw shadow first (if enabled)
+        if (textElement.shadow) {
+            this.ctx.save();
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            this.ctx.fillText(text, x + 2, y + 2);
+            this.ctx.restore();
+        }
+
+        // Draw outline (if enabled)
+        if (textElement.outline) {
+            this.ctx.save();
+            this.ctx.strokeStyle = textElement.outlineColor || '#ffffff';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeText(text, x, y);
+            this.ctx.restore();
+        }
+
+        // Draw main text
+        this.ctx.fillStyle = color;
+        this.ctx.fillText(text, x, y);
+    }
+
+    drawCurvedTextWithEffects(textElement, centerX, centerY) {
+        if (textElement.curve === 0) {
+            this.drawTextWithEffects(textElement, centerX, centerY);
+            return;
+        }
+
+        const text = textElement.text;
+        const color = textElement.color || '#000000';
+        const radius = Math.abs(textElement.curve) * 2;
+        const totalAngle = 2 * Math.PI;
+        const baseAngleStep = totalAngle / text.length;
+        const angleStep = baseAngleStep + ((textElement.letterSpacing || 0) * Math.PI / 180);
+        const startAngle = textElement.curve > 0 ? Math.PI : 0;
+
+        // Draw shadow for curved text (if enabled)
+        if (textElement.shadow) {
+            this.ctx.save();
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            for (let i = 0; i < text.length; i++) {
+                const angle = startAngle + (i * angleStep * (textElement.curve > 0 ? 1 : -1));
+                const x = centerX + Math.cos(angle) * radius + 2;
+                const y = centerY + Math.sin(angle) * radius + 2;
+
+                this.ctx.save();
+                this.ctx.translate(x, y);
+                this.ctx.rotate(angle + Math.PI / 2);
+                this.ctx.fillText(text[i], 0, 0);
+                this.ctx.restore();
+            }
+            this.ctx.restore();
+        }
+
+        // Draw outline for curved text (if enabled)
+        if (textElement.outline) {
+            this.ctx.save();
+            this.ctx.strokeStyle = textElement.outlineColor || '#ffffff';
+            this.ctx.lineWidth = 2;
+            for (let i = 0; i < text.length; i++) {
+                const angle = startAngle + (i * angleStep * (textElement.curve > 0 ? 1 : -1));
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+
+                this.ctx.save();
+                this.ctx.translate(x, y);
+                this.ctx.rotate(angle + Math.PI / 2);
+                this.ctx.strokeText(text[i], 0, 0);
+                this.ctx.restore();
+            }
+            this.ctx.restore();
+        }
+
+        // Draw main curved text
+        this.ctx.fillStyle = color;
+        for (let i = 0; i < text.length; i++) {
+            const angle = startAngle + (i * angleStep * (textElement.curve > 0 ? 1 : -1));
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+
+            this.ctx.save();
+            this.ctx.translate(x, y);
+            this.ctx.rotate(angle + Math.PI / 2);
+            this.ctx.fillText(text[i], 0, 0);
+            this.ctx.restore();
+        }
+    }
+
     addText() {
         const textInput = document.getElementById('textInput');
         const fontFamily = document.getElementById('fontFamily').value;
         const textColor = document.getElementById('textColor').value;
         const fontSize = parseInt(document.getElementById('fontSize').value);
+        const boldBtn = document.getElementById('boldBtn');
+        const italicBtn = document.getElementById('italicBtn');
+        const textOutline = document.getElementById('textOutline').checked;
+        const textShadow = document.getElementById('textShadow').checked;
+        const outlineColor = document.getElementById('outlineColor').value;
+        const textRotation = parseInt(document.getElementById('textRotation').value);
+        const alignCenter = document.getElementById('alignCenter').classList.contains('bg-yellow-600');
 
         if (textInput.value.trim()) {
             let x, y;
@@ -658,6 +903,13 @@ class StampDesigner {
                 fontFamily: fontFamily,
                 color: textColor,
                 fontSize: fontSize,
+                bold: boldBtn.classList.contains('bg-yellow-600'),
+                italic: italicBtn.classList.contains('bg-yellow-600'),
+                outline: textOutline,
+                shadow: textShadow,
+                outlineColor: outlineColor,
+                rotation: textRotation,
+                alignment: alignCenter ? 'center' : 'left',
                 x: x,
                 y: y,
                 curve: 0, // Curve level (-100 to 100)
@@ -933,6 +1185,7 @@ class StampDesigner {
             [this.shapes[this.selectedShape], this.shapes[this.selectedShape + 1]] = [this.shapes[this.selectedShape + 1], this.shapes[this.selectedShape]];
             this.selectedShape++;
             this.updateLayerList();
+            this.updateUIForSelectedShape();
             this.drawStamp();
         } else if (this.selectedElement && this.selectedElement !== 'shape') {
             const index = this.textElements.indexOf(this.selectedElement);
@@ -940,6 +1193,7 @@ class StampDesigner {
                 [this.textElements[index], this.textElements[index + 1]] = [this.textElements[index + 1], this.textElements[index]];
                 this.selectedElement = this.textElements[index + 1];
                 this.updateLayerList();
+                this.updateUIForSelectedShape();
                 this.drawStamp();
             }
         }
@@ -951,6 +1205,7 @@ class StampDesigner {
             [this.shapes[this.selectedShape], this.shapes[this.selectedShape - 1]] = [this.shapes[this.selectedShape - 1], this.shapes[this.selectedShape]];
             this.selectedShape--;
             this.updateLayerList();
+            this.updateUIForSelectedShape();
             this.drawStamp();
         } else if (this.selectedElement && this.selectedElement !== 'shape') {
             const index = this.textElements.indexOf(this.selectedElement);
@@ -958,6 +1213,7 @@ class StampDesigner {
                 [this.textElements[index], this.textElements[index - 1]] = [this.textElements[index - 1], this.textElements[index]];
                 this.selectedElement = this.textElements[index - 1];
                 this.updateLayerList();
+                this.updateUIForSelectedShape();
                 this.drawStamp();
             }
         }
@@ -1026,6 +1282,98 @@ class StampDesigner {
             this.ctx.moveTo(0, y);
             this.ctx.lineTo(this.canvas.width, y);
             this.ctx.stroke();
+        }
+    }
+
+    drawTextWithEffectsToContext(ctx, textElement, x, y) {
+        const text = textElement.text;
+        const color = textElement.color || '#000000';
+
+        // Draw shadow first (if enabled)
+        if (textElement.shadow) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillText(text, x + 2, y + 2);
+            ctx.restore();
+        }
+
+        // Draw outline (if enabled)
+        if (textElement.outline) {
+            ctx.save();
+            ctx.strokeStyle = textElement.outlineColor || '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.strokeText(text, x, y);
+            ctx.restore();
+        }
+
+        // Draw main text
+        ctx.fillStyle = color;
+        ctx.fillText(text, x, y);
+    }
+
+    drawCurvedTextWithEffectsToContext(ctx, textElement, centerX, centerY) {
+        if (textElement.curve === 0) {
+            this.drawTextWithEffectsToContext(ctx, textElement, centerX, centerY);
+            return;
+        }
+
+        const text = textElement.text;
+        const color = textElement.color || '#000000';
+        const radius = Math.abs(textElement.curve) * 2;
+        const totalAngle = 2 * Math.PI;
+        const baseAngleStep = totalAngle / text.length;
+        const angleStep = baseAngleStep + ((textElement.letterSpacing || 0) * Math.PI / 180);
+        const startAngle = textElement.curve > 0 ? Math.PI : 0;
+
+        // Draw shadow for curved text (if enabled)
+        if (textElement.shadow) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            for (let i = 0; i < text.length; i++) {
+                const angle = startAngle + (i * angleStep * (textElement.curve > 0 ? 1 : -1));
+                const x = centerX + Math.cos(angle) * radius + 2;
+                const y = centerY + Math.sin(angle) * radius + 2;
+
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle + Math.PI / 2);
+                ctx.fillText(text[i], 0, 0);
+                ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        // Draw outline for curved text (if enabled)
+        if (textElement.outline) {
+            ctx.save();
+            ctx.strokeStyle = textElement.outlineColor || '#ffffff';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < text.length; i++) {
+                const angle = startAngle + (i * angleStep * (textElement.curve > 0 ? 1 : -1));
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle + Math.PI / 2);
+                ctx.strokeText(text[i], 0, 0);
+                ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        // Draw main curved text
+        ctx.fillStyle = color;
+        for (let i = 0; i < text.length; i++) {
+            const angle = startAngle + (i * angleStep * (textElement.curve > 0 ? 1 : -1));
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle + Math.PI / 2);
+            ctx.fillText(text[i], 0, 0);
+            ctx.restore();
         }
     }
 
@@ -1122,19 +1470,40 @@ class StampDesigner {
         // Draw text elements in reverse order (last added on top)
         for (let i = this.textElements.length - 1; i >= 0; i--) {
             const textElement = this.textElements[i];
-            ctx.fillStyle = textElement.color || '#000000';
-            ctx.font = `${textElement.fontSize || 16}px ${textElement.fontFamily}`;
-            ctx.textAlign = 'center';
+
+            // Build font string with bold and italic
+            let fontWeight = '';
+            if (textElement.bold) fontWeight += 'bold ';
+            if (textElement.italic) fontWeight += 'italic ';
+            ctx.font = `${fontWeight}${textElement.fontSize || 16}px ${textElement.fontFamily}`;
+
+            // Set text alignment
+            ctx.textAlign = textElement.alignment || 'center';
             ctx.textBaseline = 'middle';
 
             const x = textElement.x || this.canvas.width / 2;
             const y = textElement.y || (this.canvas.height / 2 + (i * 30));
 
-            if (textElement.curve && textElement.curve !== 0) {
-                this.drawCurvedTextToContext(ctx, textElement.text, x, y, textElement.curve, textElement.letterSpacing);
-            } else {
-                ctx.fillText(textElement.text, x, y);
+            // Save context for rotation
+            ctx.save();
+
+            // Apply rotation if needed
+            if (textElement.rotation && textElement.rotation !== 0) {
+                ctx.translate(x, y);
+                ctx.rotate((textElement.rotation * Math.PI) / 180);
+                ctx.translate(-x, -y);
             }
+
+            // Draw text with effects
+            if (textElement.curve && textElement.curve !== 0) {
+                // Curved text with effects
+                this.drawCurvedTextWithEffectsToContext(ctx, textElement, x, y);
+            } else {
+                // Regular text with effects
+                this.drawTextWithEffectsToContext(ctx, textElement, x, y);
+            }
+
+            ctx.restore();
         }
     }
 
