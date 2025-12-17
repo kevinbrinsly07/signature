@@ -10,6 +10,7 @@ class StampDesigner {
         this.dragOffset = { x: 0, y: 0 };
         this.scale = 1; // Scale factor for rendering
         this.clipboard = null; // Store copied element
+        this.currentEnhancement = 'original'; // Track current enhancement for CSS filters
 
         this.init();
         this.bindEvents();
@@ -270,10 +271,10 @@ class StampDesigner {
             }
         });
 
-        // Export button
+        // Export button - now shows enhancement modal
         document.getElementById('exportPNG').addEventListener('click', () => {
             const transparent = document.getElementById('transparentBg').checked;
-            this.exportStamp('png', transparent);
+            this.showEnhancementModal(transparent);
         });
 
         // Clear design button
@@ -728,7 +729,20 @@ class StampDesigner {
             }
         }
 
+        // Apply CSS filters for enhancement effects
+        this.applyEnhancementFilters();
+
         this.updateLayerList();
+    }
+
+    applyEnhancementFilters() {
+        // Remove existing enhancement classes
+        this.canvas.classList.remove('canvas-vintage', 'canvas-fadeout');
+        
+        // Apply current enhancement filter
+        if (this.currentEnhancement !== 'original') {
+            this.canvas.classList.add(`canvas-${this.currentEnhancement}`);
+        }
     }
 
     drawCurvedText(text, centerX, centerY, curveLevel, letterSpacing = 0) {
@@ -1377,7 +1391,434 @@ class StampDesigner {
         }
     }
 
-    exportStamp(format = 'png', transparent = false) {
+    showEnhancementModal(transparent) {
+        const modal = document.getElementById('enhancementModal');
+        const grid = document.getElementById('enhancementGrid');
+        
+        // Clear previous content
+        grid.innerHTML = '';
+        
+        // Define enhancement options
+        const enhancements = [
+            { id: 'original', name: 'Original', description: 'Standard stamp design' },
+            { id: 'vintage', name: 'Vintage', description: 'Aged stamp with faded ink' },
+            { id: 'fadeout', name: 'Fadeout', description: 'Stamp with faded areas from repeated use' }
+        ];
+        
+        enhancements.forEach(enhancement => {
+            const card = document.createElement('div');
+            card.className = 'enhancement-card bg-slate-700 rounded-lg p-4 cursor-pointer border-2 border-transparent hover:border-blue-400 transition duration-300';
+            card.innerHTML = `
+                <div class="text-center mb-2">
+                    <canvas class="enhancement-preview border border-slate-600 rounded mx-auto" width="120" height="120"></canvas>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-200 mb-1">${enhancement.name}</h3>
+                <p class="text-sm text-gray-400">${enhancement.description}</p>
+            `;
+            
+            card.addEventListener('click', () => {
+                // Remove selection from all cards
+                document.querySelectorAll('.enhancement-card').forEach(c => {
+                    c.classList.remove('border-blue-400');
+                    c.classList.add('border-transparent');
+                });
+                
+                // Select this card
+                card.classList.remove('border-transparent');
+                card.classList.add('border-blue-400');
+                
+                // Store selection in modal
+                modal.dataset.selectedEnhancement = enhancement.id;
+                document.getElementById('confirmExport').disabled = false;
+            });
+            
+            grid.appendChild(card);
+            
+            // Generate preview
+            const previewCanvas = card.querySelector('.enhancement-preview');
+            this.generateEnhancementPreview(previewCanvas, enhancement.id, transparent);
+        });
+        
+        // Store selected enhancement in modal data
+        modal.dataset.selectedEnhancement = '';
+        
+        // Disable confirm button initially
+        document.getElementById('confirmExport').disabled = true;
+        
+        // Modal event listeners - use event delegation
+        const handleModalClick = (e) => {
+            const target = e.target;
+            
+            if (target.id === 'closeModal' || target.id === 'cancelExport') {
+                modal.classList.add('hidden');
+                modal.removeEventListener('click', handleModalClick);
+                document.removeEventListener('keydown', escapeHandler);
+            } else if (target.id === 'confirmExport') {
+                const selected = modal.dataset.selectedEnhancement;
+                if (selected) {
+                    this.exportStamp('png', transparent, selected);
+                    modal.classList.add('hidden');
+                    modal.removeEventListener('click', handleModalClick);
+                    document.removeEventListener('keydown', escapeHandler);
+                }
+            }
+        };
+        
+        modal.addEventListener('click', handleModalClick);
+        
+        // Show modal
+        modal.classList.remove('hidden');
+        
+        // Add escape key listener
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                modal.classList.add('hidden');
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+        
+        // Add click outside to close
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    }
+    
+    generateEnhancementPreview(canvas, enhancement, transparent) {
+        const ctx = canvas.getContext('2d');
+        const scale = canvas.width / this.canvas.width;
+        
+        ctx.scale(scale, scale);
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Fill background
+        if (!transparent) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+        
+        // Apply enhancement
+        this.renderWithEnhancement(ctx, enhancement);
+        
+        // Apply CSS filters for vintage enhancement
+        if (enhancement === 'vintage') {
+            canvas.classList.add('canvas-vintage');
+        } else {
+            canvas.classList.remove('canvas-vintage');
+        }
+    }
+    
+    renderWithEnhancement(ctx, enhancement) {
+        switch (enhancement) {
+            case 'original':
+                this.renderToContext(ctx);
+                break;
+            case 'vintage':
+                this.renderVintage(ctx);
+                break;
+            case 'fadeout':
+                this.renderFadeout(ctx);
+                break;
+        }
+    }
+    
+    renderVintage(ctx) {
+        // Create highly realistic vintage stamp effect
+        ctx.save();
+
+        // Render the stamp design normally first
+        this.renderToContext(ctx);
+
+        // Apply vintage effects only to the stamp areas using mask detection
+        this.applyVintageEffectsToStamp(ctx);
+
+        ctx.restore();
+    }
+
+    applyVintageEffectsToStamp(ctx) {
+        // Create a mask of the stamp design
+        const maskCanvas = document.createElement('canvas');
+        maskCanvas.width = this.canvas.width;
+        maskCanvas.height = this.canvas.height;
+        const maskCtx = maskCanvas.getContext('2d');
+
+        // Render stamp in solid color for mask
+        maskCtx.fillStyle = '#000000';
+        this.renderToContext(maskCtx);
+
+        // Get mask data to check stamp areas
+        const maskImageData = maskCtx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        const maskData = maskImageData.data;
+
+        // Apply stronger ink bleeding effect only on stamp edges
+        ctx.shadowColor = 'rgba(0,0,0,0.2)';
+        ctx.shadowBlur = 4;
+        this.renderToContext(ctx);
+        ctx.shadowBlur = 0;
+
+        // Apply stronger ink fading effects only on stamp areas
+        const inkGradient = ctx.createRadialGradient(
+            this.canvas.width * 0.3, this.canvas.height * 0.3, 0,
+            this.canvas.width / 2, this.canvas.height / 2, Math.max(this.canvas.width, this.canvas.height) * 0.8
+        );
+        inkGradient.addColorStop(0, 'rgba(255,255,255,0.12)');
+        inkGradient.addColorStop(0.4, 'rgba(255,255,255,0.35)');
+        inkGradient.addColorStop(0.7, 'rgba(255,255,255,0.55)');
+        inkGradient.addColorStop(1, 'rgba(255,255,255,0.8)');
+
+        ctx.globalCompositeOperation = 'screen';
+        ctx.fillStyle = inkGradient;
+
+        // Only apply fading where stamp exists by using the mask
+        for (let y = 0; y < this.canvas.height; y++) {
+            for (let x = 0; x < this.canvas.width; x++) {
+                const pixelIndex = (y * this.canvas.width + x) * 4;
+                if (maskData[pixelIndex + 3] > 0) { // If stamp pixel exists
+                    const alpha = maskData[pixelIndex + 3] / 255;
+                    ctx.globalAlpha = alpha * 0.8; // Stronger fade based on stamp opacity
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+        }
+
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+
+        // Add realistic edge wear - remove one side of the stamp
+        ctx.globalCompositeOperation = 'destination-out';
+
+        // Choose which side to damage (randomly select one edge)
+        const sides = ['top', 'right', 'bottom', 'left'];
+        const damagedSide = sides[Math.floor(Math.random() * sides.length)];
+
+        // Create a larger missing area on the chosen side
+        ctx.fillStyle = 'rgba(0,0,0,1)'; // Complete removal
+
+        if (damagedSide === 'top') {
+            // Remove top edge - irregular curved shape
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            for (let x = 0; x <= this.canvas.width; x += 5) {
+                const y = Math.sin(x * 0.1) * 8 + Math.random() * 15 + 5;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(this.canvas.width, 0);
+            ctx.closePath();
+            ctx.fill();
+        } else if (damagedSide === 'bottom') {
+            // Remove bottom edge - irregular curved shape
+            ctx.beginPath();
+            ctx.moveTo(0, this.canvas.height);
+            for (let x = 0; x <= this.canvas.width; x += 5) {
+                const y = this.canvas.height - (Math.sin(x * 0.1) * 8 + Math.random() * 15 + 5);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(this.canvas.width, this.canvas.height);
+            ctx.closePath();
+            ctx.fill();
+        } else if (damagedSide === 'left') {
+            // Remove left edge - irregular curved shape
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            for (let y = 0; y <= this.canvas.height; y += 5) {
+                const x = Math.sin(y * 0.1) * 8 + Math.random() * 15 + 5;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(0, this.canvas.height);
+            ctx.closePath();
+            ctx.fill();
+        } else if (damagedSide === 'right') {
+            // Remove right edge - irregular curved shape
+            ctx.beginPath();
+            ctx.moveTo(this.canvas.width, 0);
+            for (let y = 0; y <= this.canvas.height; y += 5) {
+                const x = this.canvas.width - (Math.sin(y * 0.1) * 8 + Math.random() * 15 + 5);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(this.canvas.width, this.canvas.height);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        ctx.globalCompositeOperation = 'source-over';
+
+        // Add subtle color desaturation for aged look only on remaining stamp areas
+        ctx.globalCompositeOperation = 'saturation';
+        ctx.fillStyle = 'rgba(200,200,200,0.15)'; // Slight desaturation
+
+        // Get updated canvas data after edge wear effects
+        const updatedImageData = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        const updatedData = updatedImageData.data;
+
+        // Only apply desaturation where stamp still exists (not worn away)
+        for (let y = 0; y < this.canvas.height; y++) {
+            for (let x = 0; x < this.canvas.width; x++) {
+                const pixelIndex = (y * this.canvas.width + x) * 4;
+                if (updatedData[pixelIndex + 3] > 0) { // If stamp pixel still exists after wear
+                    const alpha = updatedData[pixelIndex + 3] / 255;
+                    ctx.globalAlpha = alpha * 0.15; // Subtle desaturation based on stamp opacity
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+        }
+
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+    }
+
+
+    
+
+    
+
+    
+
+    
+
+    
+    renderFadeout(ctx) {
+        // Create fadeout stamp effect like a real stamp that's been used many times
+        ctx.save();
+
+        // First, create a mask of the stamp design
+        const maskCanvas = document.createElement('canvas');
+        maskCanvas.width = this.canvas.width;
+        maskCanvas.height = this.canvas.height;
+        const maskCtx = maskCanvas.getContext('2d');
+
+        // Render stamp in solid color for mask
+        maskCtx.fillStyle = '#000000';
+        this.renderToContext(maskCtx);
+
+        // Render the stamp design normally
+        this.renderToContext(ctx);
+
+        // Apply fading effects only where stamp exists using destination-out to remove ink
+        ctx.globalCompositeOperation = 'destination-out';
+
+        // Get mask data to check stamp areas
+        const maskImageData = maskCtx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        const maskData = maskImageData.data;
+
+        // Create realistic irregular wear patterns
+        for (let i = 0; i < 35; i++) {
+            let attempts = 0;
+            let x, y, pixelIndex;
+
+            // Find a position where stamp exists (not transparent background)
+            do {
+                x = Math.floor(Math.random() * this.canvas.width);
+                y = Math.floor(Math.random() * this.canvas.height);
+                pixelIndex = (y * this.canvas.width + x) * 4;
+                attempts++;
+            } while (maskData[pixelIndex + 3] === 0 && attempts < 50); // Transparent pixel = background
+
+            if (attempts < 50) { // Found a stamp pixel
+                const opacity = Math.random() * 0.8 + 0.3; // 0.3-1.1 opacity for ink removal
+                ctx.fillStyle = `rgba(0,0,0,${opacity})`;
+
+                // Create irregular wear pattern instead of perfect circle
+                this.createIrregularWearPattern(ctx, x, y);
+            }
+        }
+
+        ctx.restore();
+    }
+
+    createIrregularWearPattern(ctx, centerX, centerY) {
+        // Create realistic irregular wear patterns like real stamp damage
+        const wearType = Math.random();
+
+        if (wearType < 0.4) {
+            // Irregular blotch - connected arcs for organic shape
+            ctx.beginPath();
+            const points = 6 + Math.floor(Math.random() * 4); // 6-9 points
+            const baseRadius = Math.random() * 8 + 4; // 4-12 pixels
+
+            for (let i = 0; i < points; i++) {
+                const angle = (i / points) * Math.PI * 2;
+                const radius = baseRadius * (0.7 + Math.random() * 0.6); // 70%-130% variation
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    // Create curved connections between points
+                    const prevAngle = ((i - 1) / points) * Math.PI * 2;
+                    const prevRadius = baseRadius * (0.7 + Math.random() * 0.6);
+                    const prevX = centerX + Math.cos(prevAngle) * prevRadius;
+                    const prevY = centerY + Math.sin(prevAngle) * prevRadius;
+
+                    const cp1x = prevX + (x - prevX) * 0.3 + (Math.random() - 0.5) * 4;
+                    const cp1y = prevY + (y - prevY) * 0.3 + (Math.random() - 0.5) * 4;
+                    const cp2x = prevX + (x - prevX) * 0.7 + (Math.random() - 0.5) * 4;
+                    const cp2y = prevY + (y - prevY) * 0.7 + (Math.random() - 0.5) * 4;
+
+                    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+
+        } else if (wearType < 0.7) {
+            // Scratch-like wear - thin irregular line
+            ctx.beginPath();
+            const length = Math.random() * 15 + 8; // 8-23 pixels
+            const angle = Math.random() * Math.PI * 2;
+            const segments = 3 + Math.floor(Math.random() * 3); // 3-5 segments
+
+            ctx.moveTo(centerX, centerY);
+
+            for (let i = 1; i <= segments; i++) {
+                const segmentAngle = angle + (Math.random() - 0.5) * 0.8; // Slight angle variation
+                const segmentLength = length / segments * (0.8 + Math.random() * 0.4); // Length variation
+                const endX = centerX + Math.cos(segmentAngle) * segmentLength * i / segments;
+                const endY = centerY + Math.sin(segmentAngle) * segmentLength * i / segments;
+
+                // Add slight curve to the segment
+                const midX = (centerX + endX) / 2 + (Math.random() - 0.5) * 3;
+                const midY = (centerY + endY) / 2 + (Math.random() - 0.5) * 3;
+
+                if (i === 1) {
+                    ctx.quadraticCurveTo(midX, midY, endX, endY);
+                } else {
+                    ctx.lineTo(endX, endY);
+                }
+            }
+
+            ctx.stroke();
+
+        } else {
+            // Small irregular chip - tiny irregular polygon
+            ctx.beginPath();
+            const sides = 3 + Math.floor(Math.random() * 3); // 3-5 sides
+            const radius = Math.random() * 4 + 2; // 2-6 pixels
+
+            for (let i = 0; i < sides; i++) {
+                const angle = (i / sides) * Math.PI * 2 + Math.random() * 0.5; // Slight angle variation
+                const r = radius * (0.6 + Math.random() * 0.8); // Size variation
+                const x = centerX + Math.cos(angle) * r;
+                const y = centerY + Math.sin(angle) * r;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+    
+
+
+    exportStamp(format = 'png', transparent = false, enhancement = 'original') {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
@@ -1396,8 +1837,8 @@ class StampDesigner {
             ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
 
-        // Draw the stamp design
-        this.renderToContext(ctx);
+        // Draw the stamp design with enhancement
+        this.renderWithEnhancement(ctx, enhancement);
 
         // Download the image
         this.downloadCanvas(canvas, `stamp-design.${format}`, `image/${format}`);
@@ -1523,7 +1964,6 @@ class StampDesigner {
         this.updateUIForSelectedShape();
         this.drawStamp();
     }
-
 }
 
 // Initialize the stamp designer when the page loads

@@ -29,7 +29,11 @@ A comprehensive web-based suite for digital signature capture and custom stamp d
 - **Text Addition**: Add custom text with various fonts, sizes, colors, and curve effects
 - **Layer Management**: Organize elements with move up/down and delete functionality
 - **Real-time Preview**: See changes instantly on the canvas
-- **PNG Export**: Save custom stamps as high-quality PNG files
+- **Enhancement Options**: Choose from multiple realistic stamp enhancement styles before export:
+  - Original: Standard stamp design
+  - Vintage: Authentic aged stamp with realistic paper texture, ink fading, creases, and discoloration effects
+  - Fadeout: Stamp with faded areas from repeated use, like a well-used rubber stamp
+- **Export Process**: Click "Export PNG" to open enhancement preview modal, select desired style, then click "Export Selected" to download
 
 ## Technologies Used
 
