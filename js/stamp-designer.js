@@ -326,6 +326,10 @@ class StampDesigner {
             document.getElementById('textColor').value = this.selectedElement.color || '#000000';
             document.getElementById('fontSize').value = this.selectedElement.fontSize || 16;
             
+            // Show text controls
+            document.getElementById('curveControl').style.display = 'block';
+            document.getElementById('letterSpacingControl').style.display = 'block';
+            
             // Enable text controls
             document.getElementById('curveSlider').disabled = false;
             document.getElementById('letterSpacingSlider').disabled = false;
@@ -355,6 +359,10 @@ class StampDesigner {
             document.getElementById('increaseBorder').disabled = true;
             document.getElementById('borderPattern').disabled = true;
             document.getElementById('borderPatternSection').style.display = 'none';
+            
+            // Hide text controls
+            document.getElementById('curveControl').style.display = 'none';
+            document.getElementById('letterSpacingControl').style.display = 'none';
             document.getElementById('curveSlider').disabled = true;
             document.getElementById('letterSpacingSlider').disabled = true;
             document.getElementById('textColor').disabled = true;
@@ -660,6 +668,8 @@ class StampDesigner {
             this.selectedElement = textElement;
             this.selectedShape = null;
             textInput.value = '';
+            this.updateUIForSelectedShape();
+            this.updateLayerList();
             this.drawStamp();
         }
     }
