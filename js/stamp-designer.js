@@ -196,7 +196,8 @@ class StampDesigner {
 
         // Export button
         document.getElementById('exportPNG').addEventListener('click', () => {
-            this.exportStamp('png');
+            const transparent = document.getElementById('transparentBg').checked;
+            this.exportStamp('png', transparent);
         });
 
         // Clear design button
@@ -474,6 +475,7 @@ class StampDesigner {
 
     drawStamp() {
         this.clearCanvas();
+        this.drawGrid();
 
         // Draw all shapes in reverse order (last added on top)
         for (let i = this.shapes.length - 1; i >= 0; i--) {
@@ -995,7 +997,29 @@ class StampDesigner {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    exportStamp(format = 'png') {
+    drawGrid() {
+        const gridSize = 20; // Size of each grid cell
+        this.ctx.strokeStyle = '#e5e7eb'; // Light gray color for grid lines
+        this.ctx.lineWidth = 0.5;
+
+        // Draw vertical lines
+        for (let x = 0; x <= this.canvas.width; x += gridSize) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, this.canvas.height);
+            this.ctx.stroke();
+        }
+
+        // Draw horizontal lines
+        for (let y = 0; y <= this.canvas.height; y += gridSize) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(this.canvas.width, y);
+            this.ctx.stroke();
+        }
+    }
+
+    exportStamp(format = 'png', transparent = false) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
@@ -1005,9 +1029,14 @@ class StampDesigner {
         canvas.height = this.canvas.height * scale;
         ctx.scale(scale, scale);
 
-        // Fill with white background to match the canvas appearance
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Ensure canvas is transparent
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Fill with white background unless transparent is requested
+        if (!transparent) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
 
         // Draw the stamp design
         this.renderToContext(ctx);
