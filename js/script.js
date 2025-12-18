@@ -117,13 +117,19 @@ function updatePageNavigation() {
     const prevBtn = document.getElementById('prevPageBtn');
     const nextBtn = document.getElementById('nextPageBtn');
     
-    if (pdfDocument && pdfDocument.numPages > 1) {
-        pageNav.classList.remove('hidden');
-        pageIndicator.textContent = `Page ${currentPageNum} of ${pdfDocument.numPages}`;
-        prevBtn.disabled = currentPageNum <= 1;
-        nextBtn.disabled = currentPageNum >= pdfDocument.numPages;
+    if (isDocumentLoaded) {
+        if (pdfDocument && pdfDocument.numPages > 1) {
+            pageNav.classList.remove('hidden');
+            pageIndicator.textContent = `Page ${currentPageNum} of ${pdfDocument.numPages}`;
+            prevBtn.disabled = currentPageNum <= 1;
+            nextBtn.disabled = currentPageNum >= pdfDocument.numPages;
+        } else {
+            pageNav.classList.add('hidden');
+            pageIndicator.textContent = 'Page 1';
+        }
     } else {
         pageNav.classList.add('hidden');
+        pageIndicator.textContent = '';
     }
 }
 
@@ -251,7 +257,7 @@ document.getElementById('colorPicker').addEventListener('input', function() {
 document.getElementById('thickness').addEventListener('input', function() {
     baseWidth = parseInt(this.value);
     ctx.lineWidth = baseWidth * renderScale;
-    document.getElementById('thicknessValue').textContent = baseWidth;
+    document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
 });
 
 // Drawing mode selectors
@@ -479,9 +485,25 @@ var isFullscreen = false;
 var originalParent = canvas.parentElement;
 var fullscreenBtn = document.getElementById('fullscreenBtn');
 var originalBtnParent = fullscreenBtn.parentElement;
+var mainContainer = document.querySelector('.max-w-7xl');
+var originalCanvasWidth = canvas.width;
+var originalCanvasHeight = canvas.height;
 document.getElementById('fullscreenBtn').addEventListener('click', function() {
     if (!isFullscreen) {
         // Enter full screen
+        // Store original canvas size
+        originalCanvasWidth = canvas.width;
+        originalCanvasHeight = canvas.height;
+        
+        // Resize canvas to screen size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Redraw content if document is loaded
+        if (isDocumentLoaded && backgroundImage) {
+            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        }
+        
         document.body.appendChild(canvas);
         canvas.style.position = 'fixed';
         canvas.style.top = '0';
@@ -489,20 +511,33 @@ document.getElementById('fullscreenBtn').addEventListener('click', function() {
         canvas.style.width = '100vw';
         canvas.style.height = '100vh';
         canvas.style.zIndex = '9999';
-        // Canvas size remains 800x400, displayed stretched to full screen
+        
         // Move button to body
         document.body.appendChild(fullscreenBtn);
         fullscreenBtn.style.position = 'fixed';
         fullscreenBtn.style.top = '20px';
         fullscreenBtn.style.right = '20px';
         fullscreenBtn.style.zIndex = '10000';
-        // Hide other elements
-        document.querySelector('.lg\\:p-8').style.display = 'none';
+        fullscreenBtn.style.height = '48px'; // Increase height for longer text
+        
+        // Hide main container
+        if (mainContainer) mainContainer.style.display = 'none';
         document.body.style.overflow = 'hidden';
-        this.innerHTML = '<i class="fas fa-compress mr-2"></i>Exit Full Screen';
+        
+        // Update button content
+        fullscreenBtn.innerHTML = '<i class="fas fa-compress mr-2 text-[#0A0A0A]"></i><div class="text-[#0A0A0A]">Exit Full Screen</div>';
         isFullscreen = true;
     } else {
         // Exit full screen
+        // Restore original canvas size
+        canvas.width = originalCanvasWidth;
+        canvas.height = originalCanvasHeight;
+        
+        // Redraw content if document is loaded
+        if (isDocumentLoaded && backgroundImage) {
+            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        }
+        
         originalParent.appendChild(canvas);
         canvas.style.position = '';
         canvas.style.top = '';
@@ -510,17 +545,21 @@ document.getElementById('fullscreenBtn').addEventListener('click', function() {
         canvas.style.width = '';
         canvas.style.height = '';
         canvas.style.zIndex = '';
-        // Canvas size remains 800x400
+        
         // Move button back
         originalBtnParent.appendChild(fullscreenBtn);
         fullscreenBtn.style.position = '';
         fullscreenBtn.style.top = '';
         fullscreenBtn.style.right = '';
         fullscreenBtn.style.zIndex = '';
-        // Show other elements
-        document.querySelector('.lg\\:p-8').style.display = '';
+        fullscreenBtn.style.height = ''; // Restore original height
+        
+        // Show main container
+        if (mainContainer) mainContainer.style.display = '';
         document.body.style.overflow = '';
-        this.innerHTML = '<i class="fas fa-expand mr-2"></i>Full Screen';
+        
+        // Update button content
+        fullscreenBtn.innerHTML = '<img src="./assets/fullScreen-icon.svg" /><span class="text-[#0A0A0A]">Full Screen</span>';
         isFullscreen = false;
     }
 });
@@ -674,6 +713,8 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         if (!document.getElementById('previewModal').classList.contains('hidden')) {
             closeModal();
+        } else if (isFullscreen) {
+            document.getElementById('fullscreenBtn').click();
         }
     }
 });
@@ -681,3 +722,63 @@ document.addEventListener('keydown', function(e) {
 // Initialize pen mode as active
 document.getElementById('penMode').classList.add('bg-blue-700');
 document.getElementById('penMode').classList.remove('bg-blue-600');
+
+// Thickness options
+document.getElementById('thinThickness').addEventListener('click', function() {
+    baseWidth = 2;
+    ctx.lineWidth = baseWidth * renderScale;
+    document.getElementById('thickness').value = baseWidth;
+    document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
+});
+
+document.getElementById('mediumThickness').addEventListener('click', function() {
+    baseWidth = 5;
+    ctx.lineWidth = baseWidth * renderScale;
+    document.getElementById('thickness').value = baseWidth;
+    document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
+});
+
+document.getElementById('thickThickness').addEventListener('click', function() {
+    baseWidth = 8;
+    ctx.lineWidth = baseWidth * renderScale;
+    document.getElementById('thickness').value = baseWidth;
+    document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
+});
+
+document.getElementById('boldThickness').addEventListener('click', function() {
+    baseWidth = 12;
+    ctx.lineWidth = baseWidth * renderScale;
+    document.getElementById('thickness').value = baseWidth;
+    document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
+});
+
+// Color options
+document.getElementById('colorBlack').addEventListener('click', function() {
+    document.getElementById('colorPicker').value = '#000000';
+    ctx.strokeStyle = '#000000';
+});
+
+document.getElementById('colorBlue').addEventListener('click', function() {
+    document.getElementById('colorPicker').value = '#2563EB';
+    ctx.strokeStyle = '#2563EB';
+});
+
+document.getElementById('colorRed').addEventListener('click', function() {
+    document.getElementById('colorPicker').value = '#DC2626';
+    ctx.strokeStyle = '#DC2626';
+});
+
+document.getElementById('colorGreen').addEventListener('click', function() {
+    document.getElementById('colorPicker').value = '#059669';
+    ctx.strokeStyle = '#059669';
+});
+
+document.getElementById('colorPurple').addEventListener('click', function() {
+    document.getElementById('colorPicker').value = '#7C3AED';
+    ctx.strokeStyle = '#7C3AED';
+});
+
+document.getElementById('colorOrange').addEventListener('click', function() {
+    document.getElementById('colorPicker').value = '#EA580C';
+    ctx.strokeStyle = '#EA580C';
+});

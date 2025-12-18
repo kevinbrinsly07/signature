@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Stamp Design Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .slider-thumb::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        .slider-thumb::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            border: none;
+        }
+        #stampCanvas {
+            cursor: crosshair;
+        }
+        .tool-panel {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .draggable {
+            cursor: move;
+        }
+        .selected {
+            border: 2px solid #fbbf24;
+        }
+        
+        /* Enhancement filter effects */
+        .canvas-vintage {
+            filter: sepia(0.4) brightness(0.85) contrast(1.2) saturate(0.8);
+        }
+        
+        .canvas-fadeout {
+            filter: opacity(0.7) brightness(0.9);
+        }
+    </style>
+</head>
+<body class="font-sans bg-gradient-to-br from-gray-900 to-black min-h-screen text-gray-200 p-5">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Navigation -->
+        <nav class="mb-8">
+            <ul class="flex justify-center space-x-4">
+                <li><a href="index.html" class="text-gray-200 hover:text-blue-400 transition duration-300">Signature Capture</a></li>
+                <li><a href="stamp-designer.html" class="text-gray-200 hover:text-blue-400 transition duration-300">Stamp Designer</a></li>
+            </ul>
+        </nav>
+
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-700 to-purple-800 rounded-full mb-2">
+                <i class="fas fa-stamp text-white text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-200 mb-2">Online Stamp Design Tool</h1>
+            <p class="text-md text-gray-400">Create custom stamps with professional quality</p>
+        </div>
+
+        <!-- Main Design Area -->
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Canvas Section -->
+            <div class="flex-1 bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-6 shadow-inner">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-200">Stamp Preview</h3>
+                    <p class="text-sm text-gray-400">Real-time design preview</p>
+                </div>
+                <div class="flex justify-center">
+                    <canvas id="stampCanvas" width="400" height="400" class="border-4 border-slate-600 rounded-lg bg-white shadow-lg"></canvas>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-400">Size: <span id="sizeDisplay">40mm x 40mm</span></p>
+                    <p class="text-sm text-gray-400">Click and drag elements to reposition</p>
+                </div>
+            </div>
+
+            <!-- Tools Panel -->
+            <div class="lg:w-80 tool-panel">
+                <div class="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold text-gray-100 mb-6 flex items-center">
+                        <i class="fas fa-tools mr-3 text-blue-400"></i>
+                        Design Tools
+                    </h3>
+
+                    <!-- Shape Selection -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
+                            <i class="fas fa-shapes mr-2 text-green-400"></i>
+                            Stamp Shape
+                        </h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="shape-btn bg-gray-600 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition duration-300" data-shape="circle">
+                                <i class="fas fa-circle mr-1"></i>Circle
+                            </button>
+                            <button class="shape-btn bg-gray-600 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition duration-300" data-shape="rectangle">
+                                <i class="fas fa-square mr-1"></i>Rectangle
+                            </button>
+                            <button class="shape-btn bg-gray-600 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition duration-300" data-shape="oval">
+                                <i class="fas fa-ellipsis-h mr-1"></i>Oval
+                            </button>
+                            <button class="shape-btn bg-gray-600 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition duration-300" data-shape="triangle">
+                                <i class="fas fa-play mr-1"></i>Triangle
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Size Controls -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
+                            <i class="fas fa-ruler mr-2 text-purple-400"></i>
+                            Size (mm)
+                        </h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-sm text-gray-300">Width/Diameter:</label>
+                                <input type="range" id="widthSlider" min="20" max="350" value="300" class="w-full h-3 bg-gradient-to-r from-purple-400 to-purple-700 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <span id="widthValue" class="text-sm text-purple-400">40mm</span>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-300">Height:</label>
+                                <input type="range" id="heightSlider" min="20" max="350" value="300" class="w-full h-3 bg-gradient-to-r from-purple-400 to-purple-700 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <span id="heightValue" class="text-sm text-purple-400">40mm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Color Selection -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
+                            <i class="fas fa-palette mr-2 text-red-400"></i>
+                            Stamp Color
+                        </h4>
+                        <input type="color" id="stampColor" value="#000000" class="w-full h-12 border-2 border-red-500 rounded-lg cursor-pointer shadow-inner mb-3">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="fillToggle" checked class="mr-2">
+                            <label for="fillToggle" class="text-sm text-gray-300">Filled Shape</label>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Uncheck for hollow shape with border only</p>
+
+                        <!-- Fill Pattern Selection -->
+                        <div class="mt-3">
+                            <label class="text-sm text-gray-300">Fill Pattern:</label>
+                            <select id="fillPattern" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-red-400 mt-1">
+                                <option value="solid">Solid Color</option>
+                                <option value="dots">Dots</option>
+                                <option value="stripes">Stripes</option>
+                                <option value="checks">Checks</option>
+                            </select>
+                        </div>
+
+                        <!-- Pattern Size Control -->
+                        <div class="mt-3" id="patternControls" style="display: none;">
+                            <label class="text-sm text-gray-300">Pattern Size:</label>
+                            <input type="range" id="patternSize" min="5" max="50" value="20" class="w-full h-3 bg-gradient-to-r from-red-400 to-red-700 rounded-lg appearance-none cursor-pointer slider-thumb mt-1">
+                            <span id="patternSizeValue" class="text-sm text-red-400">20px</span>
+                        </div>
+                        <div class="mt-3">
+                            <label class="text-sm text-gray-300">Border Thickness:</label>
+                            <div class="flex items-center space-x-2">
+                                <button id="decreaseBorder" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">-</button>
+                                <input type="number" id="borderThickness" value="2" min="1" max="20" class="w-16 bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-center focus:outline-none focus:border-red-400">
+                                <button id="increaseBorder" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">+</button>
+                                <span class="text-sm text-red-400">px</span>
+                            </div>
+                        </div>
+
+                        <!-- Border Pattern Selection -->
+                        <div class="mt-3" id="borderPatternSection" style="display: none;">
+                            <label class="text-sm text-gray-300">Border Pattern:</label>
+                            <select id="borderPattern" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-red-400 mt-1">
+                                <option value="solid">Solid Color</option>
+                                <option value="dashed">Dashed</option>
+                                <option value="dotted">Dotted</option>
+                                <option value="dashdot">Dash-Dot</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Text Management -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
+                            <i class="fas fa-font mr-2 text-yellow-400"></i>
+                            Text
+                        </h4>
+                        <div class="space-y-3">
+                            <input type="text" id="textInput" placeholder="Enter text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-yellow-400">
+                            <select id="fontFamily" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-yellow-400">
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                                <option value="Lucida Console">Lucida Console</option>
+                                <option value="Palatino Linotype">Palatino Linotype</option>
+                                <option value="Bookman Old Style">Bookman Old Style</option>
+                            </select>
+
+                            <!-- Text Style Options -->
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="boldBtn" class="text-style-btn bg-gray-600 hover:bg-yellow-600 text-white py-1 px-2 rounded text-sm">
+                                    <i class="fas fa-bold"></i> Bold
+                                </button>
+                                <button id="italicBtn" class="text-style-btn bg-gray-600 hover:bg-yellow-600 text-white py-1 px-2 rounded text-sm">
+                                    <i class="fas fa-italic"></i> Italic
+                                </button>
+                            </div>
+
+                            <!-- Text Effects -->
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="textOutline" class="mr-2">
+                                    <label for="textOutline" class="text-sm text-gray-300">Text Outline</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="textShadow" class="mr-2">
+                                    <label for="textShadow" class="text-sm text-gray-300">Text Shadow</label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-gray-300">Text Color:</label>
+                                <input type="color" id="textColor" value="#000000" class="w-full h-10 border-2 border-yellow-500 rounded-lg cursor-pointer shadow-inner">
+                            </div>
+
+                            <!-- Outline Color (shown when outline is enabled) -->
+                            <div id="outlineColorSection" style="display: none;">
+                                <label class="text-sm text-gray-300">Outline Color:</label>
+                                <input type="color" id="outlineColor" value="#ffffff" class="w-full h-10 border-2 border-yellow-500 rounded-lg cursor-pointer shadow-inner">
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-gray-300">Font Size:</label>
+                                <div class="flex items-center space-x-2">
+                                    <button id="decreaseFontSize" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">-</button>
+                                    <input type="number" id="fontSize" value="16" min="8" max="72" class="w-16 bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-center focus:outline-none focus:border-yellow-400">
+                                    <button id="increaseFontSize" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">+</button>
+                                    <span class="text-sm text-yellow-400">px</span>
+                                </div>
+                            </div>
+
+                            <!-- Text Alignment -->
+                            <div>
+                                <label class="text-sm text-gray-300">Text Alignment:</label>
+                                <div class="flex space-x-1 mt-1">
+                                    <button id="alignLeft" class="align-btn bg-gray-600 hover:bg-yellow-600 text-white py-1 px-2 rounded text-sm">
+                                        <i class="fas fa-align-left"></i>
+                                    </button>
+                                    <button id="alignCenter" class="align-btn bg-yellow-600 text-white py-1 px-2 rounded text-sm">
+                                        <i class="fas fa-align-center"></i>
+                                    </button>
+                                    <button id="alignRight" class="align-btn bg-gray-600 hover:bg-yellow-600 text-white py-1 px-2 rounded text-sm">
+                                        <i class="fas fa-align-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Text Rotation -->
+                            <div id="rotationControl" style="display: none;">
+                                <label class="text-sm text-gray-300">Rotation:</label>
+                                <input type="range" id="textRotation" min="-180" max="180" value="0" class="w-full h-3 bg-gradient-to-r from-yellow-400 to-yellow-700 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <div class="flex justify-between text-xs text-gray-400">
+                                    <span>-180°</span>
+                                    <span id="rotationValue" class="text-yellow-400">0°</span>
+                                    <span>180°</span>
+                                </div>
+                            </div>
+
+                            <div id="curveControl" style="display: none;">
+                                <label class="text-sm text-gray-300">Curve Level:</label>
+                                <input type="range" id="curveSlider" min="-100" max="100" value="0" class="w-full h-3 bg-gradient-to-r from-yellow-400 to-yellow-700 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <span id="curveValue" class="text-sm text-yellow-400">0</span>
+                            </div>
+                            <div id="letterSpacingControl" style="display: none;">
+                                <label class="text-sm text-gray-300">Letter Spacing:</label>
+                                <input type="range" id="letterSpacingSlider" min="-50" max="50" value="0" class="w-full h-3 bg-gradient-to-r from-yellow-400 to-yellow-700 rounded-lg appearance-none cursor-pointer slider-thumb">
+                                <span id="letterSpacingValue" class="text-sm text-yellow-400">0</span>
+                            </div>
+                            <button id="addTextBtn" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm">
+                                Add Text
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Layer Management -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
+                            <i class="fas fa-layer-group mr-2 text-purple-400"></i>
+                            Layers
+                        </h4>
+                        <div id="layerList" class="bg-gray-800 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                            <!-- Layers will be dynamically added here -->
+                        </div>
+                        <div class="mt-2 flex space-x-2">
+                            <button id="moveUpBtn" class="bg-purple-600 hover:bg-purple-700 text-white py-1 px-2 rounded text-xs disabled:opacity-50" disabled>
+                                <i class="fas fa-arrow-up mr-1"></i>Up
+                            </button>
+                            <button id="moveDownBtn" class="bg-purple-600 hover:bg-purple-700 text-white py-1 px-2 rounded text-xs disabled:opacity-50" disabled>
+                                <i class="fas fa-arrow-down mr-1"></i>Down
+                            </button>
+                            <button id="deleteLayerBtn" class="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded text-xs disabled:opacity-50" disabled>
+                                <i class="fas fa-trash mr-1"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="transparentBg" class="mr-2" checked>
+                            <label for="transparentBg" class="text-sm text-gray-300">Transparent Background</label>
+                        </div>
+                        <button id="clearDesign" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                            <i class="fas fa-trash mr-2"></i>Clear Design
+                        </button>
+                        <button id="exportPNG" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                            <i class="fas fa-download mr-2"></i>Export PNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhancement Preview Modal -->
+    <div id="enhancementModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-slate-800 rounded-xl p-6 max-w-4xl w-full max-h-90vh overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-200">Choose Enhancement Style</h2>
+                    <button id="closeModal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6" id="enhancementGrid">
+                    <!-- Enhancement options will be populated here -->
+                </div>
+                
+                <div class="flex justify-end space-x-4">
+                    <button id="cancelExport" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                        Cancel
+                    </button>
+                    <button id="confirmExport" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300" disabled>
+                        Export Selected
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/stamp-designer.js"></script>
+</body>
+</html>

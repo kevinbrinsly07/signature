@@ -8,6 +8,8 @@ class StampDesigner {
         this.selectedElement = null;
         this.isDragging = false;
         this.dragOffset = { x: 0, y: 0 };
+        this.clickX = 0;
+        this.clickY = 0;
         this.scale = 1; // Scale factor for rendering
         this.clipboard = null; // Store copied element
         this.currentEnhancement = 'original'; // Track current enhancement for CSS filters
@@ -21,6 +23,13 @@ class StampDesigner {
         // Set canvas size to match design area
         this.canvas.width = 400;
         this.canvas.height = 400;
+        
+        // Force initial canvas background to be visible
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw initial grid
+        this.drawGrid();
     }
 
     bindEvents() {
@@ -37,7 +46,7 @@ class StampDesigner {
         document.getElementById('widthSlider').addEventListener('input', (e) => {
             if (this.selectedShape !== null) {
                 this.shapes[this.selectedShape].width = parseInt(e.target.value);
-                document.getElementById('widthValue').textContent = this.shapes[this.selectedShape].width + 'mm';
+                document.getElementById('widthDisplay').querySelector('h3').textContent = this.shapes[this.selectedShape].width + 'mm';
                 this.updateSizeDisplay();
                 this.drawStamp();
             }
@@ -46,7 +55,7 @@ class StampDesigner {
         document.getElementById('heightSlider').addEventListener('input', (e) => {
             if (this.selectedShape !== null) {
                 this.shapes[this.selectedShape].height = parseInt(e.target.value);
-                document.getElementById('heightValue').textContent = this.shapes[this.selectedShape].height + 'mm';
+                document.getElementById('heightDisplay').querySelector('h3').textContent = this.shapes[this.selectedShape].height + 'mm';
                 this.updateSizeDisplay();
                 this.drawStamp();
             }
@@ -109,11 +118,19 @@ class StampDesigner {
             this.addText();
         });
 
+        // Allow adding text by pressing Enter in the text input
+        document.getElementById('textInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.addText();
+            }
+        });
+
         // Curve slider
         document.getElementById('curveSlider').addEventListener('input', (e) => {
             if (this.selectedElement && this.selectedElement.text) {
                 this.selectedElement.curve = parseInt(e.target.value);
-                document.getElementById('curveValue').textContent = this.selectedElement.curve;
+                document.getElementById('curveDisplay').querySelector('h3').textContent = this.selectedElement.curve + 'px';
                 this.drawStamp();
             }
         });
@@ -121,36 +138,42 @@ class StampDesigner {
         // Text style buttons
         document.getElementById('boldBtn').addEventListener('click', (e) => {
             e.preventDefault();
-            e.target.classList.toggle('bg-yellow-600');
-            e.target.classList.toggle('bg-gray-600');
+            e.target.classList.toggle('bg-[#DBEAFE]');
+            e.target.classList.toggle('bg-[#FFFFFF]');
             if (this.selectedElement && this.selectedElement.text) {
-                this.selectedElement.bold = e.target.classList.contains('bg-yellow-600');
+                this.selectedElement.bold = e.target.classList.contains('bg-[#DBEAFE]');
                 this.drawStamp();
             }
         });
 
         document.getElementById('italicBtn').addEventListener('click', (e) => {
             e.preventDefault();
-            e.target.classList.toggle('bg-yellow-600');
-            e.target.classList.toggle('bg-gray-600');
+            e.target.classList.toggle('bg-[#DBEAFE]');
+            e.target.classList.toggle('bg-[#FFFFFF]');
             if (this.selectedElement && this.selectedElement.text) {
-                this.selectedElement.italic = e.target.classList.contains('bg-yellow-600');
+                this.selectedElement.italic = e.target.classList.contains('bg-[#DBEAFE]');
                 this.drawStamp();
             }
         });
 
-        // Text effect checkboxes
-        document.getElementById('textOutline').addEventListener('change', (e) => {
+        // Text effect buttons
+        document.getElementById('textOutlineBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.target.classList.toggle('bg-[#DBEAFE]');
+            e.target.classList.toggle('bg-[#FFFFFF]');
             if (this.selectedElement && this.selectedElement.text) {
-                this.selectedElement.outline = e.target.checked;
+                this.selectedElement.outline = e.target.classList.contains('bg-[#DBEAFE]');
                 this.updateOutlineControls();
                 this.drawStamp();
             }
         });
 
-        document.getElementById('textShadow').addEventListener('change', (e) => {
+        document.getElementById('textShadowBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.target.classList.toggle('bg-[#DBEAFE]');
+            e.target.classList.toggle('bg-[#FFFFFF]');
             if (this.selectedElement && this.selectedElement.text) {
-                this.selectedElement.shadow = e.target.checked;
+                this.selectedElement.shadow = e.target.classList.contains('bg-[#DBEAFE]');
                 this.drawStamp();
             }
         });
@@ -163,26 +186,7 @@ class StampDesigner {
             }
         });
 
-        // Text alignment buttons
-        document.querySelectorAll('.align-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                // Remove active class from all alignment buttons
-                document.querySelectorAll('.align-btn').forEach(b => {
-                    b.classList.remove('bg-yellow-600');
-                    b.classList.add('bg-gray-600');
-                });
-                // Add active class to clicked button
-                e.target.classList.remove('bg-gray-600');
-                e.target.classList.add('bg-yellow-600');
 
-                if (this.selectedElement && this.selectedElement.text) {
-                    const alignment = e.target.id.replace('align', '').toLowerCase();
-                    this.selectedElement.alignment = alignment;
-                    this.drawStamp();
-                }
-            });
-        });
 
         // Text rotation slider
         document.getElementById('textRotation').addEventListener('input', (e) => {
@@ -198,7 +202,7 @@ class StampDesigner {
         document.getElementById('letterSpacingSlider').addEventListener('input', (e) => {
             if (this.selectedElement && this.selectedElement.text) {
                 this.selectedElement.letterSpacing = parseInt(e.target.value);
-                document.getElementById('letterSpacingValue').textContent = this.selectedElement.letterSpacing;
+                document.getElementById('letterSpacingDisplay').querySelector('h3').textContent = this.selectedElement.letterSpacing + 'px';
                 this.drawStamp();
             }
         });
@@ -215,29 +219,8 @@ class StampDesigner {
         document.getElementById('fontSize').addEventListener('input', (e) => {
             if (this.selectedElement && this.selectedElement.text) {
                 this.selectedElement.fontSize = parseInt(e.target.value);
+                document.getElementById('fontSizeDisplay').querySelector('h3').textContent = this.selectedElement.fontSize + 'px';
                 this.drawStamp();
-            }
-        });
-
-        document.getElementById('decreaseFontSize').addEventListener('click', () => {
-            if (this.selectedElement && this.selectedElement.text) {
-                const currentSize = this.selectedElement.fontSize || 16;
-                if (currentSize > 8) {
-                    this.selectedElement.fontSize = currentSize - 2;
-                    document.getElementById('fontSize').value = this.selectedElement.fontSize;
-                    this.drawStamp();
-                }
-            }
-        });
-
-        document.getElementById('increaseFontSize').addEventListener('click', () => {
-            if (this.selectedElement && this.selectedElement.text) {
-                const currentSize = this.selectedElement.fontSize || 16;
-                if (currentSize < 72) {
-                    this.selectedElement.fontSize = currentSize + 2;
-                    document.getElementById('fontSize').value = this.selectedElement.fontSize;
-                    this.drawStamp();
-                }
             }
         });
 
@@ -249,36 +232,14 @@ class StampDesigner {
             }
         });
 
-        document.getElementById('decreaseBorder').addEventListener('click', () => {
-            if (this.selectedShape !== null) {
-                const currentThickness = this.shapes[this.selectedShape].borderThickness || 2;
-                if (currentThickness > 1) {
-                    this.shapes[this.selectedShape].borderThickness = currentThickness - 1;
-                    document.getElementById('borderThickness').value = this.shapes[this.selectedShape].borderThickness;
-                    this.drawStamp();
-                }
-            }
-        });
-
-        document.getElementById('increaseBorder').addEventListener('click', () => {
-            if (this.selectedShape !== null) {
-                const currentThickness = this.shapes[this.selectedShape].borderThickness || 2;
-                if (currentThickness < 20) {
-                    this.shapes[this.selectedShape].borderThickness = currentThickness + 1;
-                    document.getElementById('borderThickness').value = this.shapes[this.selectedShape].borderThickness;
-                    this.drawStamp();
-                }
-            }
-        });
-
         // Export button - now shows enhancement modal
-        document.getElementById('exportPNG').addEventListener('click', () => {
-            const transparent = document.getElementById('transparentBg').checked;
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const transparent = document.getElementById('transparentBackground').checked;
             this.showEnhancementModal(transparent);
         });
 
         // Clear design button
-        document.getElementById('clearDesign').addEventListener('click', () => {
+        document.getElementById('clearDesignBtn').addEventListener('click', () => {
             this.clearDesign();
         });
 
@@ -290,6 +251,10 @@ class StampDesigner {
 
         // Keyboard events for deletion, copy, and paste
         document.addEventListener('keydown', (e) => {
+            // Don't handle deletion if user is typing in an input field
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                return;
+            }
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 this.deleteSelectedElement();
             } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
@@ -302,24 +267,11 @@ class StampDesigner {
                 this.pasteElement();
             }
         });
-
-        // Layer management buttons
-        document.getElementById('moveUpBtn').addEventListener('click', () => {
-            this.moveLayerUp();
-        });
-
-        document.getElementById('moveDownBtn').addEventListener('click', () => {
-            this.moveLayerDown();
-        });
-
-        document.getElementById('deleteLayerBtn').addEventListener('click', () => {
-            this.deleteLayer();
-        });
     }
 
     updateOutlineControls() {
         const outlineSection = document.getElementById('outlineColorSection');
-        const textOutline = document.getElementById('textOutline');
+        const textOutlineBtn = document.getElementById('textOutlineBtn');
         if (this.selectedElement && this.selectedElement.text && this.selectedElement.outline) {
             outlineSection.style.display = 'block';
         } else {
@@ -367,8 +319,8 @@ class StampDesigner {
             const shape = this.shapes[this.selectedShape];
             document.getElementById('widthSlider').value = shape.width;
             document.getElementById('heightSlider').value = shape.height;
-            document.getElementById('widthValue').textContent = shape.width + 'mm';
-            document.getElementById('heightValue').textContent = shape.height + 'mm';
+            document.getElementById('widthDisplay').querySelector('h3').textContent = shape.width + 'mm';
+            document.getElementById('heightDisplay').querySelector('h3').textContent = shape.height + 'mm';
             document.getElementById('stampColor').value = shape.color;
             document.getElementById('fillToggle').checked = shape.isFilled;
             document.getElementById('borderThickness').value = shape.borderThickness || 2;
@@ -383,14 +335,10 @@ class StampDesigner {
             // Border thickness controls - only enabled for hollow shapes
             if (shape.isFilled) {
                 document.getElementById('borderThickness').disabled = true;
-                document.getElementById('decreaseBorder').disabled = true;
-                document.getElementById('increaseBorder').disabled = true;
                 document.getElementById('borderPatternSection').style.display = 'none';
                 document.getElementById('borderPattern').disabled = true;
             } else {
                 document.getElementById('borderThickness').disabled = false;
-                document.getElementById('decreaseBorder').disabled = false;
-                document.getElementById('increaseBorder').disabled = false;
                 document.getElementById('borderPatternSection').style.display = 'block';
                 document.getElementById('borderPattern').disabled = false;
                 document.getElementById('borderPattern').value = shape.borderPattern || 'solid';
@@ -407,44 +355,61 @@ class StampDesigner {
         } else if (this.selectedElement && this.selectedElement.text) {
             // Text element selected
             document.getElementById('curveSlider').value = this.selectedElement.curve || 0;
-            document.getElementById('curveValue').textContent = this.selectedElement.curve || 0;
+            document.getElementById('curveDisplay').querySelector('h3').textContent = (this.selectedElement.curve || 0) + 'px';
             document.getElementById('letterSpacingSlider').value = this.selectedElement.letterSpacing || 0;
-            document.getElementById('letterSpacingValue').textContent = this.selectedElement.letterSpacing || 0;
+            document.getElementById('letterSpacingDisplay').querySelector('h3').textContent = (this.selectedElement.letterSpacing || 0) + 'px';
             document.getElementById('textColor').value = this.selectedElement.color || '#000000';
             document.getElementById('fontSize').value = this.selectedElement.fontSize || 16;
+            document.getElementById('fontSizeDisplay').querySelector('h3').textContent = (this.selectedElement.fontSize || 16) + 'px';
             document.getElementById('textRotation').value = this.selectedElement.rotation || 0;
             document.getElementById('rotationValue').textContent = (this.selectedElement.rotation || 0) + '°';
-            document.getElementById('textOutline').checked = this.selectedElement.outline || false;
-            document.getElementById('textShadow').checked = this.selectedElement.shadow || false;
             document.getElementById('outlineColor').value = this.selectedElement.outlineColor || '#ffffff';
+
+            // Update text effect buttons
+            const textOutlineBtn = document.getElementById('textOutlineBtn');
+            const textShadowBtn = document.getElementById('textShadowBtn');
+            if (this.selectedElement.outline) {
+                textOutlineBtn.classList.add('bg-[#DBEAFE]');
+                textOutlineBtn.classList.remove('bg-[#FFFFFF]');
+            } else {
+                textOutlineBtn.classList.remove('bg-[#DBEAFE]');
+                textOutlineBtn.classList.add('bg-[#FFFFFF]');
+            }
+            if (this.selectedElement.shadow) {
+                textShadowBtn.classList.add('bg-[#DBEAFE]');
+                textShadowBtn.classList.remove('bg-[#FFFFFF]');
+            } else {
+                textShadowBtn.classList.remove('bg-[#DBEAFE]');
+                textShadowBtn.classList.add('bg-[#FFFFFF]');
+            }
 
             // Update bold/italic buttons
             const boldBtn = document.getElementById('boldBtn');
             const italicBtn = document.getElementById('italicBtn');
             if (this.selectedElement.bold) {
-                boldBtn.classList.add('bg-yellow-600');
-                boldBtn.classList.remove('bg-gray-600');
+                boldBtn.classList.add('bg-[#DBEAFE]');
+                boldBtn.classList.remove('bg-[#FFFFFF]');
             } else {
-                boldBtn.classList.remove('bg-yellow-600');
-                boldBtn.classList.add('bg-gray-600');
+                boldBtn.classList.remove('bg-[#DBEAFE]');
+                boldBtn.classList.add('bg-[#FFFFFF]');
             }
             if (this.selectedElement.italic) {
-                italicBtn.classList.add('bg-yellow-600');
-                italicBtn.classList.remove('bg-gray-600');
+                italicBtn.classList.add('bg-[#DBEAFE]');
+                italicBtn.classList.remove('bg-[#FFFFFF]');
             } else {
-                italicBtn.classList.remove('bg-yellow-600');
-                italicBtn.classList.add('bg-gray-600');
+                italicBtn.classList.remove('bg-[#DBEAFE]');
+                italicBtn.classList.add('bg-[#FFFFFF]');
             }
 
             // Update alignment buttons
             document.querySelectorAll('.align-btn').forEach(btn => {
-                btn.classList.remove('bg-yellow-600');
-                btn.classList.add('bg-gray-600');
+                btn.classList.remove('bg-[#FEFCE8]', 'border-[#D08700]');
+                btn.classList.add('bg-[#F9FAFB]', 'border-[#E5E7EB]');
             });
-            const alignBtn = document.getElementById('align' + (this.selectedElement.alignment || 'center').charAt(0).toUpperCase() + (this.selectedElement.alignment || 'center').slice(1));
+            const alignBtn = document.querySelector(`.align-btn[data-align="${this.selectedElement.alignment || 'center'}"]`);
             if (alignBtn) {
-                alignBtn.classList.remove('bg-gray-600');
-                alignBtn.classList.add('bg-yellow-600');
+                alignBtn.classList.remove('bg-[#F9FAFB]', 'border-[#E5E7EB]');
+                alignBtn.classList.add('bg-[#FEFCE8]', 'border-[#D08700]');
             }
 
             // Show text controls
@@ -459,8 +424,6 @@ class StampDesigner {
             document.getElementById('textRotation').disabled = false;
             document.getElementById('textColor').disabled = false;
             document.getElementById('fontSize').disabled = false;
-            document.getElementById('decreaseFontSize').disabled = false;
-            document.getElementById('increaseFontSize').disabled = false;
             
             // Disable shape controls
             document.getElementById('widthSlider').disabled = true;
@@ -468,8 +431,6 @@ class StampDesigner {
             document.getElementById('stampColor').disabled = true;
             document.getElementById('fillToggle').disabled = true;
             document.getElementById('borderThickness').disabled = true;
-            document.getElementById('decreaseBorder').disabled = true;
-            document.getElementById('increaseBorder').disabled = true;
         } else {
             // Disable all controls when nothing is selected
             document.getElementById('widthSlider').disabled = true;
@@ -479,8 +440,6 @@ class StampDesigner {
             document.getElementById('fillPattern').disabled = true;
             document.getElementById('patternSize').disabled = true;
             document.getElementById('borderThickness').disabled = true;
-            document.getElementById('decreaseBorder').disabled = true;
-            document.getElementById('increaseBorder').disabled = true;
             document.getElementById('borderPattern').disabled = true;
             document.getElementById('borderPatternSection').style.display = 'none';
             
@@ -493,8 +452,6 @@ class StampDesigner {
             document.getElementById('textRotation').disabled = true;
             document.getElementById('textColor').disabled = true;
             document.getElementById('fontSize').disabled = true;
-            document.getElementById('decreaseFontSize').disabled = true;
-            document.getElementById('increaseFontSize').disabled = true;
         }
         this.updateSizeDisplay();
     }
@@ -894,11 +851,10 @@ class StampDesigner {
         const fontSize = parseInt(document.getElementById('fontSize').value);
         const boldBtn = document.getElementById('boldBtn');
         const italicBtn = document.getElementById('italicBtn');
-        const textOutline = document.getElementById('textOutline').checked;
-        const textShadow = document.getElementById('textShadow').checked;
+        const textOutline = document.getElementById('textOutlineBtn').classList.contains('bg-[#DBEAFE]');
+        const textShadow = document.getElementById('textShadowBtn').classList.contains('bg-[#DBEAFE]');
         const outlineColor = document.getElementById('outlineColor').value;
-        const textRotation = parseInt(document.getElementById('textRotation').value);
-        const alignCenter = document.getElementById('alignCenter').classList.contains('bg-yellow-600');
+        const textRotation = parseInt(document.getElementById('textRotation').value) || 0;
 
         if (textInput.value.trim()) {
             let x, y;
@@ -907,9 +863,9 @@ class StampDesigner {
                 x = this.shapes[this.selectedShape].x;
                 y = this.shapes[this.selectedShape].y + (this.textElements.length * 20);
             } else {
-                // Position text in center if no shape selected
-                x = this.canvas.width / 2;
-                y = this.canvas.height / 2 + (this.textElements.length * 20);
+                // Position text in the top-left corner if no shape selected
+                x = 100;
+                y = 100 + (this.textElements.length * 20);
             }
 
             const textElement = {
@@ -917,13 +873,13 @@ class StampDesigner {
                 fontFamily: fontFamily,
                 color: textColor,
                 fontSize: fontSize,
-                bold: boldBtn.classList.contains('bg-yellow-600'),
-                italic: italicBtn.classList.contains('bg-yellow-600'),
+                bold: boldBtn.classList.contains('bg-[#DBEAFE]'),
+                italic: italicBtn.classList.contains('bg-[#DBEAFE]'),
                 outline: textOutline,
                 shadow: textShadow,
                 outlineColor: outlineColor,
                 rotation: textRotation,
-                alignment: alignCenter ? 'center' : 'left',
+                alignment: 'center',
                 x: x,
                 y: y,
                 curve: 0, // Curve level (-100 to 100)
@@ -1011,9 +967,6 @@ class StampDesigner {
             if (this.isPointInShape(x, y, shape)) {
                 this.selectedShape = i;
                 this.selectedElement = 'shape';
-                this.isDragging = true;
-                this.dragOffset.x = x - shape.x;
-                this.dragOffset.y = y - shape.y;
                 this.updateUIForSelectedShape();
                 this.updateLayerList();
                 this.drawStamp();
@@ -1031,9 +984,6 @@ class StampDesigner {
                 y >= textElement.y - 8 && y <= textElement.y + 8) {
                 this.selectedElement = textElement;
                 this.selectedShape = null;
-                this.isDragging = true;
-                this.dragOffset.x = x - textElement.x;
-                this.dragOffset.y = y - textElement.y;
                 this.updateUIForSelectedShape();
                 this.updateLayerList();
                 this.drawStamp();
@@ -1131,7 +1081,20 @@ class StampDesigner {
 
     updateLayerList() {
         const layerList = document.getElementById('layerList');
+
+        // Check if there are any layers
+        const hasLayers = this.shapes.length > 0 || this.textElements.length > 0;
+
+        if (!hasLayers) {
+            // Show "No layers added yet" message
+            layerList.innerHTML = '<h3 class="text-[14px] text-[#6A7282]">No layers added yet</h3>';
+            layerList.className = 'bg-[#F9FAFB] border-[1.5px] rounded-[10px] border-[#E5E7EB] flex justify-center items-center p-5';
+            return;
+        }
+
+        // There are layers, show them in a column
         layerList.innerHTML = '';
+        layerList.className = 'bg-[#F9FAFB] border-[1.5px] rounded-[10px] border-[#E5E7EB] flex flex-col p-2 space-y-1 max-h-48 overflow-y-auto';
 
         // Add shapes to layer list (in reverse order since last added is on top)
         for (let i = this.shapes.length - 1; i >= 0; i--) {
@@ -1249,8 +1212,7 @@ class StampDesigner {
 
     updateLayerButtons() {
         const moveUpBtn = document.getElementById('moveUpBtn');
-        const moveDownBtn = document.getElementById('moveDownBtn');
-        const deleteLayerBtn = document.getElementById('deleteLayerBtn');
+        if (!moveUpBtn) return; // Skip if button doesn't exist
 
         const hasSelection = this.selectedElement !== null;
 
@@ -1258,26 +1220,26 @@ class StampDesigner {
             if (this.selectedElement === 'shape' && this.selectedShape !== null) {
                 // Shape selected
                 moveUpBtn.disabled = this.selectedShape >= this.shapes.length - 1;
-                moveDownBtn.disabled = this.selectedShape <= 0;
             } else if (this.selectedElement !== 'shape') {
                 // Text selected
                 const index = this.textElements.indexOf(this.selectedElement);
                 moveUpBtn.disabled = index >= this.textElements.length - 1;
-                moveDownBtn.disabled = index <= 0;
             }
-            deleteLayerBtn.disabled = false;
         } else {
             moveUpBtn.disabled = true;
-            moveDownBtn.disabled = true;
-            deleteLayerBtn.disabled = true;
         }
     }
 
     clearCanvas() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Fill with white background so canvas is always visible
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     drawGrid() {
+        this.ctx.save(); // Save current context state
+        
         const gridSize = 20; // Size of each grid cell
         this.ctx.strokeStyle = '#e5e7eb'; // Light gray color for grid lines
         this.ctx.lineWidth = 0.5;
@@ -1297,6 +1259,8 @@ class StampDesigner {
             this.ctx.lineTo(this.canvas.width, y);
             this.ctx.stroke();
         }
+        
+        this.ctx.restore(); // Restore context state
     }
 
     drawTextWithEffectsToContext(ctx, textElement, x, y) {
@@ -1493,12 +1457,12 @@ class StampDesigner {
         ctx.scale(scale, scale);
         
         // Clear canvas
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.clearRect(0, 0, canvas.width / scale, canvas.height / scale);
         
         // Fill background
         if (!transparent) {
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
         }
         
         // Apply enhancement

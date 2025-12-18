@@ -1,366 +1,430 @@
-<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Stamp Design Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .slider-thumb::-webkit-slider-thumb {
-            appearance: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-        }
-        .slider-thumb::-moz-range-thumb {
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-            border: none;
-        }
-        #stampCanvas {
-            cursor: crosshair;
-        }
-        .tool-panel {
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .draggable {
-            cursor: move;
-        }
-        .selected {
-            border: 2px solid #fbbf24;
-        }
-        
-        /* Enhancement filter effects */
-        .canvas-vintage {
-            filter: sepia(0.4) brightness(0.85) contrast(1.2) saturate(0.8);
-        }
-        
-        .canvas-fadeout {
-            filter: opacity(0.7) brightness(0.9);
-        }
-    </style>
+    <title>Document</title>
 </head>
-<body class="font-sans bg-gradient-to-br from-gray-900 to-black min-h-screen text-gray-200 p-5">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Navigation -->
-        <nav class="mb-8">
-            <ul class="flex justify-center space-x-4">
-                <li><a href="index.html" class="text-gray-200 hover:text-blue-400 transition duration-300">Signature Capture</a></li>
-                <li><a href="stamp-designer.html" class="text-gray-200 hover:text-blue-400 transition duration-300">Stamp Designer</a></li>
-            </ul>
-        </nav>
 
+<body class="p-5 flex flex-col items-center bg-[#ECFBFF]">
+    <div class="max-w-7xl w-full lg:p-5 flex flex-col items-center">
         <!-- Header -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-700 to-purple-800 rounded-full mb-2">
-                <i class="fas fa-stamp text-white text-2xl"></i>
+        <div
+            class="shadow-2xl border-[1px] border-[#E5E7EB] w-full flex flex-col md:flex-row gap-5 justify-between items-center p-5 rounded-[10px] bg-[#FFFFFF]">
+            <!-- left -->
+            <div
+                class="flex flex-col items-center sm:items-start text-center sm:text-start sm:flex-row gap-2 font-[400]">
+                <img src="./assets/logo.svg"
+                    class="bg-gradient-to-r from-[#155DFC] to-[#4F39F6] p-2 rounded-[14px] w-10 h-10" />
+                <div>
+                    <h1 class="text-[16px]">Stamp Designer</h1>
+                    <h3 class="text-[14px] text-[#6A7282]">Professional Stamp designing tool</h3>
+                </div>
             </div>
-            <h1 class="text-2xl font-bold text-gray-200 mb-2">Online Stamp Design Tool</h1>
-            <p class="text-md text-gray-400">Create custom stamps with professional quality</p>
+            <!-- middle -->
+            <div
+                class="flex flex-col sm:flex-row md:min-w-[270px] border-[1px] border-[#E5E7EB] shadow-2xl text-[12px] rounded-[20px] p-2">
+                <div class="bg-[#FFFFFF] p-2 rounded-[14px] text-[#000000] flex justify-center items-center flex-1"
+                    onclick="window.location.href='index.html'" style="cursor: pointer;">
+
+                    <h1>Document Signing</h1>
+
+                </div>
+
+                <div class="bg-[#155DFC] p-2 rounded-[14px] text-[#FFFFFF] flex justify-center items-center">
+
+                    <h1>Stamp Designer</h1>
+
+                </div>
+
+            </div>
+
+            <div class="text-[12px] text-[#99A1AF]">
+                <h1>Powered by Jaan Network</h1>
+            </div>
         </div>
 
-        <!-- Main Design Area -->
-        <div class="flex flex-col lg:flex-row gap-6">
+        <!-- second header -->
+        <div class="w-full flex flex-col lg:flex-row justify-between gap-5 mt-10">
+
+            <div
+                class="xl:max-w-[300px] xl:h-[75px] w-full bg-[#FFFFFF] rounded-[14px] border-[1.5px] border-[#BEDBFF] flex flex-row gap-3 items-center px-6 py-2">
+                <div class=" bg-[#F0FDF4] p-2 size-[40px] flex justify-center items-center rounded-[10px]">
+                    <img src="./assets/stamp/shape-icon.svg" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <h1 class="text-[14px]">Choose Shape</h1>
+                    <h1 class="text-[12px] text-[#6A7282]">Select from circle, rectangle, oval or triangle</h1>
+                </div>
+            </div>
+
+            <div
+                class="xl:max-w-[300px] xl:h-[75px] w-full bg-[#FFFFFF] rounded-[14px] border-[1.5px] border-[#BEDBFF] flex flex-row gap-3 items-center px-6 py-2">
+                <div class=" bg-[#FAF5FF] p-2 size-[40px] flex justify-center items-center rounded-[10px]">
+                    <img src="./assets/stamp/customize-icon.svg" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <h1 class="text-[14px]">Customize</h1>
+                    <h1 class="text-[12px] text-[#6A7282]">Set colors, patterns, and border styles</h1>
+                </div>
+            </div>
+
+            <div
+                class="xl:max-w-[300px] xl:h-[75px] w-full bg-[#FFFFFF] rounded-[14px] border-[1.5px] border-[#BEDBFF] flex flex-row gap-3 items-center px-6 py-2">
+                <div class=" bg-[#FEFCE8] p-2 size-[40px] flex justify-center items-center rounded-[10px]">
+                    <img src="./assets/stamp/addText-icon.svg" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <h1 class="text-[14px]">Add Text</h1>
+                    <h1 class="text-[12px] text-[#6A7282]">Include text with custom fonts and curves</h1>
+                </div>
+            </div>
+
+            <div
+                class="xl:max-w-[300px] xl:h-[75px] w-full bg-[#FFFFFF] rounded-[14px] border-[1.5px] border-[#BEDBFF] flex flex-row gap-3 items-center px-6 py-2">
+                <div class=" bg-[#EFF6FF] p-2 size-[40px] flex justify-center items-center rounded-[10px]">
+                    <img src="./assets/stamp/export-icon.svg" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <h1 class="text-[14px]">Export</h1>
+                    <h1 class="text-[12px] text-[#6A7282]">Download your custom stamp design</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-10 flex flex-col xl:flex-row justify-between gap-10 w-full">
+            <!-- Left side (canva) -->
             <!-- Canvas Section -->
-            <div class="flex-1 bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-6 shadow-inner">
-                <div class="text-center mb-4">
-                    <h3 class="text-xl font-semibold text-gray-200">Stamp Preview</h3>
-                    <p class="text-sm text-gray-400">Real-time design preview</p>
+            <div
+                class="relative flex flex-col justify-center items-center bg-[#FFFFFF] rounded-[24px] shadow-inner w-full p-10">
+                <div class="border-[1.5px] border-[#D1D5DC] w-full h-full rounded-[16px] p-3 ">
+                    <div class="text-center mb-4">
+                        <h3 class="text-[16px] text-[#101828]">Stamp Preview</h3>
+                        <p class="text-[14px] text-[#6A7282]">Real-time design preview</p>
+                    </div>
+                    <div class="flex justify-center">
+                        <canvas id="stampCanvas" width="400" height="400"
+                            class="border-[1.5px] border-[#E5E7EB] rounded-[14px] bg-[#FFFFFF] shadow-lg"></canvas>
+                    </div>
+                    <div class="mt-4 text-center text-[12px]">
+                        <p class="text-[#6A7282]">Size: <span id="sizeDisplay">40mm x 40mm</span></p>
+                    </div>
                 </div>
-                <div class="flex justify-center">
-                    <canvas id="stampCanvas" width="400" height="400" class="border-4 border-slate-600 rounded-lg bg-white shadow-lg"></canvas>
-                </div>
-                <div class="mt-4 text-center">
-                    <p class="text-sm text-gray-400">Size: <span id="sizeDisplay">40mm x 40mm</span></p>
-                    <p class="text-sm text-gray-400">Click and drag elements to reposition</p>
-                </div>
+                <p class="absolute bottom-3 w-full text-[12px] text-[#6A7282] text-center">Click and drag elements to
+                    reposition</p>
             </div>
 
-            <!-- Tools Panel -->
-            <div class="lg:w-80 tool-panel">
-                <div class="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-6 shadow-lg">
-                    <h3 class="text-xl font-bold text-gray-100 mb-6 flex items-center">
-                        <i class="fas fa-tools mr-3 text-blue-400"></i>
-                        Design Tools
-                    </h3>
 
-                    <!-- Shape Selection -->
-                    <div class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
-                            <i class="fas fa-shapes mr-2 text-green-400"></i>
-                            Stamp Shape
-                        </h4>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button class="shape-btn bg-gray-600 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition duration-300" data-shape="circle">
-                                <i class="fas fa-circle mr-1"></i>Circle
-                            </button>
-                            <button class="shape-btn bg-gray-600 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition duration-300" data-shape="rectangle">
-                                <i class="fas fa-square mr-1"></i>Rectangle
-                            </button>
-                            <button class="shape-btn bg-gray-600 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition duration-300" data-shape="oval">
-                                <i class="fas fa-ellipsis-h mr-1"></i>Oval
-                            </button>
-                            <button class="shape-btn bg-gray-600 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition duration-300" data-shape="triangle">
-                                <i class="fas fa-play mr-1"></i>Triangle
-                            </button>
-                        </div>
+            <!-- Right Side (Tools) -->
+            <div
+                class="xl:max-w-[319px] max-h-[597px] w-full bg-[#FFFFFF] rounded-[24px] p-5 overflow-y-auto mt-10 xl:mt-0">
+                <!-- Drawing mood -->
+                <div class="flex flex-row items-center gap-3">
+                    <div class="size-[32px] bg-[#DBEAFE] rounded-[10px] flex justify-center items-center">
+                        <img src="./assets/stamp/shapeTwo-icon.svg" alt="shape" />
                     </div>
 
-                    <!-- Size Controls -->
-                    <div class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
-                            <i class="fas fa-ruler mr-2 text-purple-400"></i>
-                            Size (mm)
-                        </h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="text-sm text-gray-300">Width/Diameter:</label>
-                                <input type="range" id="widthSlider" min="20" max="350" value="300" class="w-full h-3 bg-gradient-to-r from-purple-400 to-purple-700 rounded-lg appearance-none cursor-pointer slider-thumb">
-                                <span id="widthValue" class="text-sm text-purple-400">40mm</span>
-                            </div>
-                            <div>
-                                <label class="text-sm text-gray-300">Height:</label>
-                                <input type="range" id="heightSlider" min="20" max="350" value="300" class="w-full h-3 bg-gradient-to-r from-purple-400 to-purple-700 rounded-lg appearance-none cursor-pointer slider-thumb">
-                                <span id="heightValue" class="text-sm text-purple-400">40mm</span>
-                            </div>
-                        </div>
-                    </div>
+                    <h3 class="text-[16px]">Stamp Shape</h3>
+                </div>
 
-                    <!-- Color Selection -->
-                    <div class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
-                            <i class="fas fa-palette mr-2 text-red-400"></i>
-                            Stamp Color
-                        </h4>
-                        <input type="color" id="stampColor" value="#000000" class="w-full h-12 border-2 border-red-500 rounded-lg cursor-pointer shadow-inner mb-3">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="fillToggle" checked class="mr-2">
-                            <label for="fillToggle" class="text-sm text-gray-300">Filled Shape</label>
-                        </div>
-                        <p class="text-xs text-gray-400 mt-1">Uncheck for hollow shape with border only</p>
-
-                        <!-- Fill Pattern Selection -->
-                        <div class="mt-3">
-                            <label class="text-sm text-gray-300">Fill Pattern:</label>
-                            <select id="fillPattern" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-red-400 mt-1">
-                                <option value="solid">Solid Color</option>
-                                <option value="dots">Dots</option>
-                                <option value="stripes">Stripes</option>
-                                <option value="checks">Checks</option>
-                            </select>
-                        </div>
-
-                        <!-- Pattern Size Control -->
-                        <div class="mt-3" id="patternControls" style="display: none;">
-                            <label class="text-sm text-gray-300">Pattern Size:</label>
-                            <input type="range" id="patternSize" min="5" max="50" value="20" class="w-full h-3 bg-gradient-to-r from-red-400 to-red-700 rounded-lg appearance-none cursor-pointer slider-thumb mt-1">
-                            <span id="patternSizeValue" class="text-sm text-red-400">20px</span>
-                        </div>
-                        <div class="mt-3">
-                            <label class="text-sm text-gray-300">Border Thickness:</label>
-                            <div class="flex items-center space-x-2">
-                                <button id="decreaseBorder" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">-</button>
-                                <input type="number" id="borderThickness" value="2" min="1" max="20" class="w-16 bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-center focus:outline-none focus:border-red-400">
-                                <button id="increaseBorder" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">+</button>
-                                <span class="text-sm text-red-400">px</span>
-                            </div>
-                        </div>
-
-                        <!-- Border Pattern Selection -->
-                        <div class="mt-3" id="borderPatternSection" style="display: none;">
-                            <label class="text-sm text-gray-300">Border Pattern:</label>
-                            <select id="borderPattern" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-red-400 mt-1">
-                                <option value="solid">Solid Color</option>
-                                <option value="dashed">Dashed</option>
-                                <option value="dotted">Dotted</option>
-                                <option value="dashdot">Dash-Dot</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Text Management -->
-                    <div class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
-                            <i class="fas fa-font mr-2 text-yellow-400"></i>
-                            Text
-                        </h4>
-                        <div class="space-y-3">
-                            <input type="text" id="textInput" placeholder="Enter text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-yellow-400">
-                            <select id="fontFamily" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-yellow-400">
-                                <option value="Arial">Arial</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                                <option value="Courier New">Courier New</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Verdana">Verdana</option>
-                                <option value="Impact">Impact</option>
-                                <option value="Comic Sans MS">Comic Sans MS</option>
-                                <option value="Trebuchet MS">Trebuchet MS</option>
-                                <option value="Lucida Console">Lucida Console</option>
-                                <option value="Palatino Linotype">Palatino Linotype</option>
-                                <option value="Bookman Old Style">Bookman Old Style</option>
-                            </select>
-
-                            <!-- Text Style Options -->
-                            <div class="grid grid-cols-2 gap-2">
-                                <button id="boldBtn" class="text-style-btn bg-gray-600 hover:bg-yellow-600 text-white py-1 px-2 rounded text-sm">
-                                    <i class="fas fa-bold"></i> Bold
-                                </button>
-                                <button id="italicBtn" class="text-style-btn bg-gray-600 hover:bg-yellow-600 text-white py-1 px-2 rounded text-sm">
-                                    <i class="fas fa-italic"></i> Italic
-                                </button>
-                            </div>
-
-                            <!-- Text Effects -->
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="textOutline" class="mr-2">
-                                    <label for="textOutline" class="text-sm text-gray-300">Text Outline</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="textShadow" class="mr-2">
-                                    <label for="textShadow" class="text-sm text-gray-300">Text Shadow</label>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-300">Text Color:</label>
-                                <input type="color" id="textColor" value="#000000" class="w-full h-10 border-2 border-yellow-500 rounded-lg cursor-pointer shadow-inner">
-                            </div>
-
-                            <!-- Outline Color (shown when outline is enabled) -->
-                            <div id="outlineColorSection" style="display: none;">
-                                <label class="text-sm text-gray-300">Outline Color:</label>
-                                <input type="color" id="outlineColor" value="#ffffff" class="w-full h-10 border-2 border-yellow-500 rounded-lg cursor-pointer shadow-inner">
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-300">Font Size:</label>
-                                <div class="flex items-center space-x-2">
-                                    <button id="decreaseFontSize" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">-</button>
-                                    <input type="number" id="fontSize" value="16" min="8" max="72" class="w-16 bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-center focus:outline-none focus:border-yellow-400">
-                                    <button id="increaseFontSize" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">+</button>
-                                    <span class="text-sm text-yellow-400">px</span>
-                                </div>
-                            </div>
-
-                            <!-- Text Alignment -->
-                            <div>
-                                <label class="text-sm text-gray-300">Text Alignment:</label>
-                                <div class="flex space-x-1 mt-1">
-                                    <button id="alignLeft" class="align-btn bg-gray-600 hover:bg-yellow-600 text-white py-1 px-2 rounded text-sm">
-                                        <i class="fas fa-align-left"></i>
-                                    </button>
-                                    <button id="alignCenter" class="align-btn bg-yellow-600 text-white py-1 px-2 rounded text-sm">
-                                        <i class="fas fa-align-center"></i>
-                                    </button>
-                                    <button id="alignRight" class="align-btn bg-gray-600 hover:bg-yellow-600 text-white py-1 px-2 rounded text-sm">
-                                        <i class="fas fa-align-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Text Rotation -->
-                            <div id="rotationControl" style="display: none;">
-                                <label class="text-sm text-gray-300">Rotation:</label>
-                                <input type="range" id="textRotation" min="-180" max="180" value="0" class="w-full h-3 bg-gradient-to-r from-yellow-400 to-yellow-700 rounded-lg appearance-none cursor-pointer slider-thumb">
-                                <div class="flex justify-between text-xs text-gray-400">
-                                    <span>-180°</span>
-                                    <span id="rotationValue" class="text-yellow-400">0°</span>
-                                    <span>180°</span>
-                                </div>
-                            </div>
-
-                            <div id="curveControl" style="display: none;">
-                                <label class="text-sm text-gray-300">Curve Level:</label>
-                                <input type="range" id="curveSlider" min="-100" max="100" value="0" class="w-full h-3 bg-gradient-to-r from-yellow-400 to-yellow-700 rounded-lg appearance-none cursor-pointer slider-thumb">
-                                <span id="curveValue" class="text-sm text-yellow-400">0</span>
-                            </div>
-                            <div id="letterSpacingControl" style="display: none;">
-                                <label class="text-sm text-gray-300">Letter Spacing:</label>
-                                <input type="range" id="letterSpacingSlider" min="-50" max="50" value="0" class="w-full h-3 bg-gradient-to-r from-yellow-400 to-yellow-700 rounded-lg appearance-none cursor-pointer slider-thumb">
-                                <span id="letterSpacingValue" class="text-sm text-yellow-400">0</span>
-                            </div>
-                            <button id="addTextBtn" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm">
-                                Add Text
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Layer Management -->
-                    <div class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-200 mb-3 flex items-center">
-                            <i class="fas fa-layer-group mr-2 text-purple-400"></i>
-                            Layers
-                        </h4>
-                        <div id="layerList" class="bg-gray-800 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
-                            <!-- Layers will be dynamically added here -->
-                        </div>
-                        <div class="mt-2 flex space-x-2">
-                            <button id="moveUpBtn" class="bg-purple-600 hover:bg-purple-700 text-white py-1 px-2 rounded text-xs disabled:opacity-50" disabled>
-                                <i class="fas fa-arrow-up mr-1"></i>Up
-                            </button>
-                            <button id="moveDownBtn" class="bg-purple-600 hover:bg-purple-700 text-white py-1 px-2 rounded text-xs disabled:opacity-50" disabled>
-                                <i class="fas fa-arrow-down mr-1"></i>Down
-                            </button>
-                            <button id="deleteLayerBtn" class="bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded text-xs disabled:opacity-50" disabled>
-                                <i class="fas fa-trash mr-1"></i>Delete
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="space-y-3">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="transparentBg" class="mr-2" checked>
-                            <label for="transparentBg" class="text-sm text-gray-300">Transparent Background</label>
-                        </div>
-                        <button id="clearDesign" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                            <i class="fas fa-trash mr-2"></i>Clear Design
+                <div class="mt-5 flex flex-col gap-2">
+                    <div class="flex flex-row gap-2">
+                        <button class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#155DFC] bg-[#EFF6FF] flex flex-col gap-2 justify-center items-center cursor-pointer" data-shape="circle">
+                            <img src="./assets/stamp/circle-icon.svg" alt="circle" />
+                            <h3 class="text-[12px] text-[#155DFC]">Circle</h3>
                         </button>
-                        <button id="exportPNG" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                            <i class="fas fa-download mr-2"></i>Export PNG
+
+                        <button class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer" data-shape="rectangle">
+                            <img src="./assets/stamp/rectangle-icon.svg" alt="rectangle" />
+                            <h3 class="text-[12px] text-[#4A5565]">Rectangle</h3>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-row gap-2">
+                        <button class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer" data-shape="oval">
+                            <img src="./assets/stamp/oval-icon.svg" alt="oval" />
+                            <h3 class="text-[12px] text-[#4A5565]">Oval</h3>
+                        </button>
+
+                        <button class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer" data-shape="triangle">
+                            <img src="./assets/stamp/triangle-icon.svg" alt="triangle" />
+                            <h3 class="text-[12px] text-[#4A5565]">Triangle</h3>
                         </button>
                     </div>
                 </div>
+
+
+
+                <!-- divider -->
+                <div class="w-full h-[1px] bg-[#E5E7EB] my-10"></div>
+
+
+                <!-- stamp size -->
+                <div>
+                    <div class="flex flex-row items-center gap-3">
+                        <div class="size-[32px] bg-[#F3E8FF] rounded-[10px] flex justify-center items-center">
+                            <img src="./assets/stamp/size-icon.svg" alt="size" />
+                        </div>
+
+                        <h3 class="text-[16px]">Size (mm)</h3>
+                    </div>
+
+                    <div class="flex flex-col gap-3 mt-5">
+                        <div>
+                            <div class="flex flex-row justify-between items-center">
+                                <h3 class="text-[#4A5565]">Width/Diameter</h3>
+                                <div id="widthDisplay"
+                                    class="w-[50px] h-[23px] bg-[#F3E8FF] rounded-[10px] flex justify-center items-center text-[12px] p-1">
+                                    <h3>300mm</h3>
+                                </div>
+                            </div>
+                            <input type="range" id="widthSlider" min="20" max="350" value="300" class="w-full mt-2">
+                        </div>
+                        <div>
+                            <div class="flex flex-row justify-between items-center">
+                                <h3 class="text-[#4A5565]">Height</h3>
+                                <div id="heightDisplay"
+                                    class="w-[50px] h-[23px] bg-[#F3E8FF] rounded-[10px] flex justify-center items-center text-[12px] p-1">
+                                    <h3>300mm</h3>
+                                </div>
+                            </div>
+                            <input type="range" id="heightSlider" min="20" max="350" value="300" class="w-full mt-2">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- divider -->
+                <div class="w-full h-[1px] bg-[#E5E7EB] mb-5 mt-10"></div>
+
+                <!-- Stamp color -->
+                <div class="flex flex-col items-start gap-2">
+                    <div class="flex flex-row items-center gap-3 mb-5">
+                        <div class="size-[32px] bg-[#FCE7F3] rounded-[10px] flex justify-center items-center">
+                            <img src="./assets/color-icon.svg" alt="pen" />
+                        </div>
+                        <h3 class="text-[16px]">Color</h3>
+                    </div>
+
+                    <input type="color" id="stampColor" value="#DC2626"
+                        class="lg:w-[255px] h-[80px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer">
+                    </input>
+
+                    <div class="flex flex-row gap-2">
+                        <input type="checkbox" id="fillToggle" checked />
+                        <h1 class="text-[14px] text-[#364153]">Filled Shape</h1>
+                    </div>
+
+                    <div class="mt-2">
+                        <label class="text-[14px] text-[#4A5565]">Fill Pattern</label>
+                        <select id="fillPattern"
+                            class="lg:w-[255px] h-[40px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer">
+                            <option value="solid">Solid</option>
+                            <option value="stripes">Stripes</option>
+                            <option value="dots">Dots</option>
+                            <option value="grid">Grid</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-2" id="patternControls">
+                        <label class="text-[14px] text-[#4A5565]">Pattern Size</label>
+                        <input type="range" id="patternSize" min="5" max="50" value="20" class="w-full mt-2">
+                        <span id="patternSizeValue" class="text-sm text-red-400">20px</span>
+                    </div>
+                </div>
+
+                <!-- divider -->
+                <div class="w-full h-[1px] bg-[#E5E7EB] mt-5 mb-10"></div>
+
+                <div>
+                    <div class="flex flex-row items-center gap-3 mb-5">
+                        <div class="size-[32px] bg-[#FFEDD4] rounded-[10px] flex justify-center items-center">
+                            <img src="./assets/stamp/border-icon.svg" alt="border" />
+                        </div>
+                        <h3 class="text-[16px]">Border</h3>
+                    </div>
+
+                    <div>
+                        <div class="flex flex-row justify-between items-center">
+                            <h3 class="text-[#4A5565]">Thickness</h3>
+                            <div id="borderDisplay"
+                                class="w-[50px] h-[23px] bg-[#FFEDD4] rounded-[10px] flex justify-center items-center text-[12px] p-1">
+                                <h3>2px</h3>
+                            </div>
+                        </div>
+                        <input type="range" id="borderThickness" min="1" max="20" value="3" class="w-full mt-2">
+                    </div>
+
+                    <div class="mt-2" id="borderPatternSection">
+                        <label class="text-[14px] text-[#4A5565]">Border Pattern</label>
+                        <select id="borderPattern" class="w-full h-[40px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer">
+                            <option value="solid">Solid</option>
+                            <option value="dashed">Dashed</option>
+                            <option value="dotted">Dotted</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <!-- divider -->
+                <div class="w-full h-[1px] bg-[#E5E7EB] mt-5 mb-10"></div>
+
+                <div>
+                    <div class="flex flex-row items-center gap-3 mb-5">
+                        <div class="size-[32px] bg-[#FEF9C2] rounded-[10px] flex justify-center items-center">
+                            <img src="./assets/stamp/addText-icon.svg" alt="border" />
+                        </div>
+                        <h3 class="text-[16px]">Text</h3>
+                    </div>
+
+                    <div>
+                        <input type="text" id="textInput" placeholder="Enter stamp text"
+                            class="w-full h-[41px] border-[1px] border-[#E5E7EB] bg-[#F9FAFB] rounded-[14px] p-2">
+                        </input>
+                    </div>
+
+                    <button id="addTextBtn" class="mt-2 px-4 py-2 bg-green-500 text-white rounded">Add Text</button>
+
+                    <div class="mt-5">
+                        <label class="text-[14px] text-[#4A5565]">Font</label>
+                        <select id="fontFamily"
+                            class="w-full h-[40px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] rounded-[14px] p-2 cursor-pointer mt-2">
+                            <option value="Arial">Arial</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Georgia">Georgia</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-5">
+                        <label class="text-[14px] text-[#4A5565]">Text Color</label>
+                        <input type="color" id="textColor" value="#000000"
+                            class="lg:w-[255px] h-[80px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer mt-3">
+                        </input>
+                    </div>
+
+                    <div class="mt-5 flex flex-col gap-5">
+                        <div>
+                            <div class="flex flex-row justify-between items-center">
+                                <h3 class="text-[#4A5565]">Font Size</h3>
+                                <div id="fontSizeDisplay"
+                                    class="w-[50px] h-[23px] bg-[#FEF9C2] rounded-[10px] flex justify-center items-center text-[12px] p-1">
+                                    <h3>16px</h3>
+                                </div>
+                            </div>
+                            <input type="range" id="fontSize" min="8" max="72" value="16" class="w-full mt-2">
+                        </div>
+
+                        <div id="curveControl" style="display: none;">
+                            <div class="flex flex-row justify-between items-center">
+                                <h3 class="text-[#4A5565]">Curve Level</h3>
+                                <div id="curveDisplay"
+                                    class="w-[50px] h-[23px] bg-[#FEF9C2] rounded-[10px] flex justify-center items-center text-[12px] p-1">
+                                    <h3>0px</h3>
+                                </div>
+                            </div>
+                            <input type="range" id="curveSlider" min="-100" max="100" value="0" class="w-full mt-2">
+                        </div>
+
+                        <div id="letterSpacingControl" style="display: none;">
+                            <div class="flex flex-row justify-between items-center">
+                                <h3 class="text-[#4A5565]">Letter Spacing</h3>
+                                <div id="letterSpacingDisplay"
+                                    class="w-[50px] h-[23px] bg-[#FEF9C2] rounded-[10px] flex justify-center items-center text-[12px] p-1">
+                                    <h3>0px</h3>
+                                </div>
+                            </div>
+                            <input type="range" id="letterSpacingSlider" min="-50" max="50" value="0" class="w-full mt-2">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-row gap-2 justify-between items-center text-[14px] mt-5">
+                        <button id="boldBtn" class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Bold</button>
+                        <button id="italicBtn" class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Italic</button>
+                        <button id="textOutlineBtn" class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Outline</button>
+                        <button id="textShadowBtn" class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Shadow</button>
+                    </div>
+
+                    <div id="outlineColorSection" class="mt-2 hidden">
+                        <label class="text-[14px] text-[#4A5565]">Outline Color</label>
+                        <input type="color" id="outlineColor" value="#000000" class="w-full h-[40px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer mt-2">
+                    </div>
+
+                    <div id="rotationControl" style="display: none;">
+                        <label class="text-[14px] text-[#4A5565]">Rotation</label>
+                        <input type="number" id="textRotation" placeholder="0"
+                            class="w-full h-[41px] border-[1px] border-[#E5E7EB] bg-[#F9FAFB] rounded-[14px] p-2 mt-2">
+                        </input>
+                        <span id="rotationValue" class="text-sm text-yellow-400">0°</span>
+                    </div>
+
+                    <!-- divider -->
+                    <div class="w-full h-[1px] bg-[#E5E7EB] mt-5 mb-10"></div>
+
+                    <div>
+
+                        <div class="flex flex-row items-center gap-3 mb-5">
+                            <div class="size-[32px] bg-[#E0E7FF] rounded-[10px] flex justify-center items-center">
+                                <img src="./assets/stamp/layers-icon.svg" alt="layers" />
+                            </div>
+                            <h3 class="text-[16px]">Layers</h3>
+                        </div>
+
+                        <div id="layerList"
+                            class="bg-[#F9FAFB] border-[1.5px] rounded-[10px] border-[#E5E7EB] flex justify-center items-center p-5">
+                        </div>
+
+                        <div class="flex justify-center items-center mt-5">
+                            <div class="flex flex-row gap-2">
+                                <input type="checkbox" id="transparentBackground" />
+                                <h1 class="text-[14px] text-[#364153]">Transparent Background</h1>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center items-center mt-5">
+                            <div class="flex flex-row gap-5">
+                                <!-- <button id="moveUpBtn"
+                                    class="w-[40px] h-[32px] border-[1.5px] bg-[#3FD1001A] border-[#3FD100] flex justify-center items-center rounded-[10px] cursor-pointer">
+                                    <img src="./assets/stamp/edit-icon.svg" alt="move up" />
+                                </button> -->
+
+                                <button id="clearDesignBtn"
+                                    class="w-[40px] h-[32px] border-[1.5px] bg-[#FF00081A] border-[#FF0004] flex justify-center items-center rounded-[10px] cursor-pointer">
+                                    <img src="./assets/stamp/delete-icon.svg" alt="clear design" />
+                                </button>
+
+                                <button id="exportBtn"
+                                    class="w-[40px] h-[32px] border-[1.5px] bg-[#0080FF1A] border-[#155DFC] flex justify-center items-center rounded-[10px] cursor-pointer">
+                                    <img src="./assets/stamp/save-icon.svg" alt="export" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 flex flex-col gap-2">
+                        </div>
+                </div>
             </div>
         </div>
-    </div>
+        </div>
 
-    <!-- Enhancement Preview Modal -->
-    <div id="enhancementModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-slate-800 rounded-xl p-6 max-w-4xl w-full max-h-90vh overflow-y-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-200">Choose Enhancement Style</h2>
-                    <button id="closeModal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+        <!-- Enhancement Modal -->
+        <div id="enhancementModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+                <h3 class="text-lg font-semibold mb-4">Choose Enhancement</h3>
+                <div id="enhancementGrid" class="grid grid-cols-1 gap-4 mb-4">
+                    <!-- Options will be added here -->
                 </div>
-                
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6" id="enhancementGrid">
-                    <!-- Enhancement options will be populated here -->
-                </div>
-                
-                <div class="flex justify-end space-x-4">
-                    <button id="cancelExport" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                        Cancel
-                    </button>
-                    <button id="confirmExport" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300" disabled>
-                        Export Selected
-                    </button>
+                <div class="flex justify-end gap-2">
+                    <button id="cancelExport" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+                    <button id="confirmExport" class="px-4 py-2 bg-blue-500 text-white rounded" disabled>Export</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- JavaScript -->
-    <script src="js/stamp-designer.js"></script>
-</body>
+        <script src="js/stamp-designer.js"></script>
+    </body>
+
 </html>
