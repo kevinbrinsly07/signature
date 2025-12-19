@@ -395,12 +395,17 @@ canvas.addEventListener('touchend', function(e) {
     stopDrawing();
 }, { passive: false });
 document.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-    draw(e);
+    if (e.touches.length === 1) {
+        e.preventDefault();
+        draw(e);
+    }
+    // For multi-touch (2+ fingers), allow default behavior for zoom/pan
 }, { passive: false });
 
 // Function to start drawing
 function startDrawing(e) {
+    // Only start drawing with single touch
+    if (e.touches && e.touches.length > 1) return;
     // Don't start drawing if panning
     if (isPanning) return;
     
