@@ -611,16 +611,6 @@ class StampDesigner {
                     }
                     break;
 
-                case 'oval':
-                    this.ctx.beginPath();
-                    this.ctx.ellipse(shape.x, shape.y, pixelWidth / 2, pixelHeight / 2, 0, 0, 2 * Math.PI);
-                    if (shape.isFilled) {
-                        this.ctx.fill();
-                    } else {
-                        this.ctx.stroke();
-                    }
-                    break;
-
                 case 'triangle':
                     this.ctx.beginPath();
                     this.ctx.moveTo(shape.x, shape.y - pixelHeight / 2);
@@ -917,11 +907,6 @@ class StampDesigner {
                 return x >= centerX - pixelWidth / 2 && x <= centerX + pixelWidth / 2 &&
                        y >= centerY - pixelHeight / 2 && y <= centerY + pixelHeight / 2;
 
-            case 'oval':
-                const normalizedX = (x - centerX) / (pixelWidth / 2);
-                const normalizedY = (y - centerY) / (pixelHeight / 2);
-                return (normalizedX ** 2 + normalizedY ** 2) <= 1;
-
             case 'triangle':
                 // Simple triangle bounds check - could be more precise
                 return x >= centerX - pixelWidth / 2 && x <= centerX + pixelWidth / 2 &&
@@ -1144,7 +1129,7 @@ class StampDesigner {
 
             layerItem.innerHTML = `
                 <div class="flex items-center">
-                    <i class="fas fa-${shape.type === 'circle' ? 'circle' : shape.type === 'rectangle' ? 'square' : shape.type === 'oval' ? 'ellipsis-h' : 'play'} mr-2 text-purple-400"></i>
+                    <i class="fas fa-${shape.type === 'circle' ? 'circle' : shape.type === 'rectangle' ? 'square' : 'play'} mr-2 text-purple-400"></i>
                     <span class="text-sm text-gray-200 capitalize">${shape.type} ${i + 1}</span>
                 </div>
                 <div class="text-xs text-gray-400">${shape.width}×${shape.height}</div>
@@ -1880,16 +1865,6 @@ class StampDesigner {
                         ctx.fillRect(rectX, rectY, pixelWidth, pixelHeight);
                     } else {
                         ctx.strokeRect(rectX, rectY, pixelWidth, pixelHeight);
-                    }
-                    break;
-
-                case 'oval':
-                    ctx.beginPath();
-                    ctx.ellipse(shape.x, shape.y, pixelWidth / 2, pixelHeight / 2, 0, 0, 2 * Math.PI);
-                    if (shape.isFilled) {
-                        ctx.fill();
-                    } else {
-                        ctx.stroke();
                     }
                     break;
 
