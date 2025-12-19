@@ -447,6 +447,7 @@ document.addEventListener('touchmove', function(e) {
     const touches = e.touches;
 
     if (touches.length === 2 && isPinching) {
+        e.preventDefault();
         // Two fingers: handle both pinch zoom and pan simultaneously
         // Handle pinch zoom
         const currentDistance = getTouchDistance(touches);
