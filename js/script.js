@@ -54,6 +54,7 @@ let lastTouchX = 0;
 let lastTouchY = 0;
 let touchScrollLeft = 0;
 let touchScrollTop = 0;
+let lastDistance = 0; // Track previous distance to detect pinch vs pan
 
 // Set drawing properties
 ctx.strokeStyle = '#000000';
@@ -419,6 +420,7 @@ canvas.addEventListener('touchstart', function(e) {
         // Two fingers: start pinch zoom and pan
         isPinching = true;
         initialPinchDistance = getTouchDistance(touches);
+        lastDistance = initialPinchDistance; // Initialize last distance
         initialZoomLevel = zoomLevel;
         // Also prepare for panning
         const center = getTouchCenter(touches);
@@ -448,28 +450,33 @@ document.addEventListener('touchmove', function(e) {
 
     if (touches.length === 2 && isPinching) {
         e.preventDefault();
-        // Two fingers: handle both pinch zoom and pan simultaneously
-        // Handle pinch zoom
+        // Two fingers: determine if pinch zoom or pan based on distance stability
         const currentDistance = getTouchDistance(touches);
-        const scale = currentDistance / initialPinchDistance;
-        const newZoomLevel = Math.max(minZoom, Math.min(maxZoom, initialZoomLevel * scale));
-
-        if (newZoomLevel !== zoomLevel) {
-            zoomLevel = newZoomLevel;
-            updateZoom();
-        }
-
-        // Handle pan with two fingers
+        const distanceChange = Math.abs(currentDistance - lastDistance) / lastDistance;
         const center = getTouchCenter(touches);
-        const deltaX = center.x - lastTouchX;
-        const deltaY = center.y - lastTouchY;
+        
+        // If distance changed significantly (>5%), treat as pinch zoom
+        if (distanceChange > 0.05) {
+            // Handle pinch zoom
+            const scale = currentDistance / initialPinchDistance;
+            const newZoomLevel = Math.max(minZoom, Math.min(maxZoom, initialZoomLevel * scale));
 
-        canvasContainer.scrollLeft = touchScrollLeft - deltaX;
-        canvasContainer.scrollTop = touchScrollTop - deltaY;
+            if (newZoomLevel !== zoomLevel) {
+                zoomLevel = newZoomLevel;
+                updateZoom();
+            }
+        } else if (zoomLevel > 1) {
+            // Distance stable and zoomed: handle pan with two fingers
+            const deltaX = center.x - lastTouchX;
+            const deltaY = center.y - lastTouchY;
+
+            canvasContainer.scrollLeft = touchScrollLeft - deltaX;
+            canvasContainer.scrollTop = touchScrollTop - deltaY;
+        }
 
         lastTouchX = center.x;
         lastTouchY = center.y;
-
+        lastDistance = currentDistance;
     } else if (touches.length === 1 && drawing) {
         // One finger: handle drawing only
         draw(e);
