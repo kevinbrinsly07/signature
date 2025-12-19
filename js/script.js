@@ -417,7 +417,7 @@ canvas.addEventListener('touchstart', function(e) {
 
     if (touches.length === 2) {
         // Two fingers: start pinch zoom and pan
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         isPinching = true;
         initialPinchDistance = getTouchDistance(touches);
         initialZoomLevel = zoomLevel;
@@ -449,7 +449,7 @@ document.addEventListener('touchmove', function(e) {
 
     if (touches.length === 2 && isPinching) {
         // Two fingers: handle both pinch zoom and pan simultaneously
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
 
         // Handle pinch zoom
         const currentDistance = getTouchDistance(touches);
@@ -474,7 +474,7 @@ document.addEventListener('touchmove', function(e) {
 
     } else if (touches.length === 1 && drawing) {
         // One finger: handle drawing only
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         draw(e);
     }
     // For other cases, allow default behavior
@@ -802,7 +802,7 @@ document.getElementById('zoomResetBtn').addEventListener('click', function() {
 // Mouse wheel zoom
 canvasContainer.addEventListener('wheel', function(e) {
     if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         const delta = e.deltaY > 0 ? -zoomStep : zoomStep;
         const newZoom = Math.max(minZoom, Math.min(maxZoom, zoomLevel + delta));
         
@@ -829,7 +829,7 @@ canvasContainer.addEventListener('wheel', function(e) {
 canvasContainer.addEventListener('mousedown', function(e) {
     // Pan with middle mouse button or spacebar + left click when zoomed
     if (zoomLevel > 1 && (e.button === 1 || (e.button === 0 && isSpacePressed))) {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         isPanning = true;
         panStartX = e.clientX;
         panStartY = e.clientY;
@@ -841,7 +841,7 @@ canvasContainer.addEventListener('mousedown', function(e) {
 
 document.addEventListener('mousemove', function(e) {
     if (isPanning) {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         const deltaX = e.clientX - panStartX;
         const deltaY = e.clientY - panStartY;
         canvasContainer.scrollLeft = scrollLeft - deltaX;
@@ -1081,14 +1081,14 @@ document.addEventListener('keydown', function(e) {
     if (e.ctrlKey || e.metaKey) {
         switch(e.key) {
             case 'z':
-                e.preventDefault();
+                if (e.cancelable) e.preventDefault();
                 document.getElementById('undoBtn').click();
                 break;
         }
     }
     if (e.key === 'Delete' || e.key === 'Backspace') {
         if (!drawing) {
-            e.preventDefault();
+            if (e.cancelable) e.preventDefault();
             document.getElementById('clearBtn').click();
         }
     }
