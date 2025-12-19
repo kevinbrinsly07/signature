@@ -386,139 +386,18 @@ document.addEventListener('keyup', function(e) {
 document.addEventListener('mousemove', draw);
 
 // Touch events for mobile
-let touchStartTime = 0;
-let touchStartPos = { x: 0, y: 0 };
-let isMultiTouch = false;
-let lastTouchDistance = 0;
-let touchMoved = false; // Track if touch has moved (for distinguishing tap vs drag)
-
 canvas.addEventListener('touchstart', function(e) {
     e.preventDefault();
-    
-    const touches = e.touches;
-    touchStartTime = Date.now();
-    touchStartPos = { x: touches[0].clientX, y: touches[0].clientY };
-    touchMoved = false;
-    
-    // Check if multi-touch (for panning when zoomed)
-    if (touches.length > 1 && zoomLevel > 1) {
-        isMultiTouch = true;
-        lastTouchDistance = getTouchDistance(touches[0], touches[1]);
-        startPanning(e);
-        return;
-    }
-    
-    // Single touch - check if we should pan or draw
-    if (zoomLevel > 1) {
-        // When zoomed, single touch should pan (like spacebar + click on desktop)
-        isSpacePressed = true; // Simulate spacebar press for mobile
-        startPanning(e);
-    } else {
-        // When not zoomed, single touch should draw
-        startDrawing(e);
-    }
-});
-
-canvas.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-    
-    const touches = e.touches;
-    touchMoved = true; // Mark that touch has moved
-    
-    if (isMultiTouch && touches.length > 1) {
-        // Handle pinch-to-zoom
-        const currentDistance = getTouchDistance(touches[0], touches[1]);
-        const scaleChange = currentDistance / lastTouchDistance;
-        
-        if (Math.abs(scaleChange - 1) > 0.1) { // Significant change
-            const newZoom = Math.max(minZoom, Math.min(maxZoom, zoomLevel * scaleChange));
-            if (newZoom !== zoomLevel) {
-                zoomLevel = newZoom;
-                updateZoom();
-                lastTouchDistance = currentDistance;
-            }
-        }
-    } else if (zoomLevel > 1) {
-        // Single touch panning when zoomed
-        panDocument(e);
-    } else {
-        // Single touch drawing when not zoomed
-        draw(e);
-    }
-});
-
+    startDrawing(e);
+}, { passive: false });
 canvas.addEventListener('touchend', function(e) {
     e.preventDefault();
-    
-    const touchDuration = Date.now() - touchStartTime;
-    const touches = e.changedTouches;
-    const endPos = { x: touches[0].clientX, y: touches[0].clientY };
-    const moveDistance = Math.sqrt(
-        Math.pow(endPos.x - touchStartPos.x, 2) + 
-        Math.pow(endPos.y - touchStartPos.y, 2)
-    );
-    
-    if (isMultiTouch) {
-        stopPanning();
-        isMultiTouch = false;
-    } else if (zoomLevel > 1) {
-        stopPanning();
-        isSpacePressed = false; // Reset spacebar simulation
-    } else {
-        // For drawing mode, only stop if it was a short tap or if touch moved significantly
-        if (touchMoved || touchDuration < 500) {
-            stopDrawing();
-        }
-    }
-});
-
-// Helper function to get distance between two touches
-function getTouchDistance(touch1, touch2) {
-    const dx = touch1.clientX - touch2.clientX;
-    const dy = touch1.clientY - touch2.clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-}
-
-// Function to start panning (mobile version)
-function startPanning(e) {
-    isPanning = true;
-    const touches = e.touches || e.changedTouches;
-    panStartX = touches[0].clientX;
-    panStartY = touches[0].clientY;
-    scrollLeft = canvasContainer.scrollLeft;
-    scrollTop = canvasContainer.scrollTop;
-    
-    // Show movement indicators
-    const movementIndicators = document.getElementById('movementIndicators');
-    movementIndicators.classList.remove('hidden', 'opacity-0');
-    movementIndicators.classList.add('opacity-100');
-}
-
-// Function to pan document (mobile version)
-function panDocument(e) {
-    if (!isPanning) return;
-    
-    const touches = e.touches || e.changedTouches;
-    const deltaX = touches[0].clientX - panStartX;
-    const deltaY = touches[0].clientY - panStartY;
-    canvasContainer.scrollLeft = scrollLeft - deltaX;
-    canvasContainer.scrollTop = scrollTop - deltaY;
-}
-
-// Function to stop panning (mobile version)
-function stopPanning() {
-    if (isPanning) {
-        isPanning = false;
-        
-        // Hide movement indicators
-        const movementIndicators = document.getElementById('movementIndicators');
-        movementIndicators.classList.remove('opacity-100');
-        movementIndicators.classList.add('opacity-0');
-        setTimeout(() => {
-            movementIndicators.classList.add('hidden');
-        }, 300);
-    }
-}
+    stopDrawing();
+}, { passive: false });
+document.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    draw(e);
+}, { passive: false });
 
 // Function to start drawing
 function startDrawing(e) {
@@ -787,43 +666,11 @@ function updateZoom() {
     const canvasWidth = canvas.width * zoomLevel;
     const canvasHeight = canvas.height * zoomLevel;
     
-    // Enable scrolling and show movement indicators when zoomed in
-    const movementIndicators = document.getElementById('movementIndicators');
+    // Enable scrolling when zoomed in
     if (zoomLevel > 1) {
         canvas.style.cursor = 'move';
-        movementIndicators.classList.remove('hidden');
-        movementIndicators.classList.add('opacity-100');
-        
-        // Show keyboard hint for spacebar panning (desktop only)
-        const keyboardHint = document.createElement('div');
-        keyboardHint.id = 'keyboardHint';
-        keyboardHint.className = 'absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg animate-fade-in hidden md:block';
-        keyboardHint.innerHTML = '<i class="fas fa-keyboard mr-1"></i>Hold SPACE to pan';
-        
-        // Remove existing hint if present
-        const existingHint = document.getElementById('keyboardHint');
-        if (existingHint) existingHint.remove();
-        
-        canvasContainer.appendChild(keyboardHint);
-        
-        // Hide indicators after 4 seconds
-        setTimeout(() => {
-            movementIndicators.classList.remove('opacity-100');
-            movementIndicators.classList.add('opacity-0');
-            keyboardHint.classList.add('animate-fade-out');
-            setTimeout(() => {
-                movementIndicators.classList.add('hidden');
-                keyboardHint.remove();
-            }, 300);
-        }, 4000);
     } else {
         canvas.style.cursor = 'crosshair';
-        movementIndicators.classList.add('opacity-0');
-        movementIndicators.classList.add('hidden');
-        
-        // Remove keyboard hint
-        const existingHint = document.getElementById('keyboardHint');
-        if (existingHint) existingHint.remove();
     }
 }
 
@@ -888,11 +735,6 @@ canvasContainer.addEventListener('mousedown', function(e) {
         scrollLeft = canvasContainer.scrollLeft;
         scrollTop = canvasContainer.scrollTop;
         canvasContainer.style.cursor = 'grabbing';
-        
-        // Show movement indicators when panning starts
-        const movementIndicators = document.getElementById('movementIndicators');
-        movementIndicators.classList.remove('hidden', 'opacity-0');
-        movementIndicators.classList.add('opacity-100');
     }
 });
 
@@ -910,14 +752,6 @@ document.addEventListener('mouseup', function(e) {
     if (isPanning) {
         isPanning = false;
         canvasContainer.style.cursor = zoomLevel > 1 ? (isSpacePressed ? 'grab' : 'move') : '';
-        
-        // Hide movement indicators after panning stops
-        const movementIndicators = document.getElementById('movementIndicators');
-        movementIndicators.classList.remove('opacity-100');
-        movementIndicators.classList.add('opacity-0');
-        setTimeout(() => {
-            movementIndicators.classList.add('hidden');
-        }, 300);
     }
 });
 
@@ -927,11 +761,6 @@ document.addEventListener('keydown', function(e) {
         e.preventDefault();
         isSpacePressed = true;
         canvasContainer.style.cursor = 'grab';
-        
-        // Show movement indicators when space is pressed for panning
-        const movementIndicators = document.getElementById('movementIndicators');
-        movementIndicators.classList.remove('hidden', 'opacity-0');
-        movementIndicators.classList.add('opacity-100');
     }
 });
 
@@ -940,14 +769,6 @@ document.addEventListener('keyup', function(e) {
         isSpacePressed = false;
         if (zoomLevel > 1 && !isPanning) {
             canvasContainer.style.cursor = 'move';
-            
-            // Hide movement indicators when space is released
-            const movementIndicators = document.getElementById('movementIndicators');
-            movementIndicators.classList.remove('opacity-100');
-            movementIndicators.classList.add('opacity-0');
-            setTimeout(() => {
-                movementIndicators.classList.add('hidden');
-            }, 300);
         }
     }
 });
