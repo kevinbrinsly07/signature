@@ -422,10 +422,12 @@ canvas.addEventListener('touchstart', function(e) {
         initialPinchDistance = getTouchDistance(touches);
         lastDistance = initialPinchDistance; // Initialize last distance
         initialZoomLevel = zoomLevel;
-        // Store center for pinch zoom calculations
+        // Store center for pinch zoom and pan calculations
         const center = getTouchCenter(touches);
         lastTouchX = center.x;
         lastTouchY = center.y;
+        touchScrollLeft = canvasContainer.scrollLeft;
+        touchScrollTop = canvasContainer.scrollTop;
     } else if (touches.length === 1) {
         // One finger: start drawing and prevent scrolling
         e.preventDefault();
@@ -464,6 +466,13 @@ canvas.addEventListener('touchmove', function(e) {
                 zoomLevel = newZoomLevel;
                 updateZoom();
             }
+        } else {
+            // Distance stable: handle pan with two fingers
+            const deltaX = center.x - lastTouchX;
+            const deltaY = center.y - lastTouchY;
+
+            canvasContainer.scrollLeft = touchScrollLeft - deltaX;
+            canvasContainer.scrollTop = touchScrollTop - deltaY;
         }
 
         lastTouchX = center.x;
