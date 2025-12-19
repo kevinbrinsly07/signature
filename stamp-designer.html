@@ -411,15 +411,15 @@
         </div>
 
         <!-- Enhancement Modal -->
-        <div id="enhancementModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-                <h3 class="text-lg font-semibold mb-4">Choose Enhancement</h3>
-                <div id="enhancementGrid" class="grid grid-cols-1 gap-4 mb-4">
+        <div id="enhancementModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div class="bg-white p-4 sm:p-6 rounded-lg max-w-3xl w-full max-h-[90vh] flex flex-col my-auto">
+                <h3 class="text-base sm:text-lg font-semibold mb-4">Choose Enhancement</h3>
+                <div id="enhancementGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 overflow-y-auto">
                     <!-- Options will be added here -->
                 </div>
-                <div class="flex justify-end gap-2">
-                    <button id="cancelExport" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-                    <button id="confirmExport" class="px-4 py-2 bg-blue-500 text-white rounded" disabled>Export</button>
+                <div class="flex justify-end gap-2 mt-auto">
+                    <button id="cancelExport" class="px-3 sm:px-4 py-2 bg-gray-200 rounded text-sm sm:text-base">Cancel</button>
+                    <button id="confirmExport" class="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded text-sm sm:text-base" disabled>Export</button>
                 </div>
             </div>
         </div>
