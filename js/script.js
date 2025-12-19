@@ -422,17 +422,16 @@ canvas.addEventListener('touchstart', function(e) {
         initialPinchDistance = getTouchDistance(touches);
         lastDistance = initialPinchDistance; // Initialize last distance
         initialZoomLevel = zoomLevel;
-        // Also prepare for panning
+        // Store center for pinch zoom calculations
         const center = getTouchCenter(touches);
         lastTouchX = center.x;
         lastTouchY = center.y;
-        touchScrollLeft = canvasContainer.scrollLeft;
-        touchScrollTop = canvasContainer.scrollTop;
     } else if (touches.length === 1) {
-        // One finger: start drawing
+        // One finger: start drawing and prevent scrolling
+        e.preventDefault();
         startDrawing(e);
     }
-}, { passive: true });
+}, { passive: false });
 
 canvas.addEventListener('touchend', function(e) {
     const touches = e.touches;
@@ -445,7 +444,7 @@ canvas.addEventListener('touchend', function(e) {
     }
 });
 
-document.addEventListener('touchmove', function(e) {
+canvas.addEventListener('touchmove', function(e) {
     const touches = e.touches;
 
     if (touches.length === 2 && isPinching) {
@@ -465,24 +464,18 @@ document.addEventListener('touchmove', function(e) {
                 zoomLevel = newZoomLevel;
                 updateZoom();
             }
-        } else if (zoomLevel > 1) {
-            // Distance stable and zoomed: handle pan with two fingers
-            const deltaX = center.x - lastTouchX;
-            const deltaY = center.y - lastTouchY;
-
-            canvasContainer.scrollLeft = touchScrollLeft - deltaX;
-            canvasContainer.scrollTop = touchScrollTop - deltaY;
         }
 
         lastTouchX = center.x;
         lastTouchY = center.y;
         lastDistance = currentDistance;
     } else if (touches.length === 1 && drawing) {
-        // One finger: handle drawing only
+        // One finger: handle drawing only and prevent scrolling
+        e.preventDefault();
         draw(e);
     }
     // For other cases, allow default behavior
-});
+}, { passive: false });
 
 // Function to start drawing
 function startDrawing(e) {
@@ -547,18 +540,32 @@ function stopDrawing() {
 
 function getX(e) {
     var rect = canvas.getBoundingClientRect();
-    // Account for CSS zoom scaling: rect dimensions are visual, canvas dimensions are actual pixels
-    var visualScaleX = rect.width / canvas.offsetWidth; // CSS scaling factor
-    var pixelScaleX = canvas.width / canvas.offsetWidth; // Base pixel ratio
-    return ((e.clientX || e.touches[0].clientX) - rect.left) * (pixelScaleX / visualScaleX);
+    // Get the client coordinates
+    var clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    
+    // Calculate position relative to canvas, accounting for CSS transform scale
+    // When zoomed, rect dimensions include the zoom, so we divide by zoomLevel
+    var canvasX = (clientX - rect.left) / zoomLevel;
+    
+    // Scale to actual canvas pixel coordinates
+    var pixelX = canvasX * (canvas.width / canvas.offsetWidth);
+    
+    return pixelX;
 }
 
 function getY(e) {
     var rect = canvas.getBoundingClientRect();
-    // Account for CSS zoom scaling: rect dimensions are visual, canvas dimensions are actual pixels
-    var visualScaleY = rect.height / canvas.offsetHeight; // CSS scaling factor
-    var pixelScaleY = canvas.height / canvas.offsetHeight; // Base pixel ratio
-    return ((e.clientY || e.touches[0].clientY) - rect.top) * (pixelScaleY / visualScaleY);
+    // Get the client coordinates
+    var clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+    
+    // Calculate position relative to canvas, accounting for CSS transform scale
+    // When zoomed, rect dimensions include the zoom, so we divide by zoomLevel
+    var canvasY = (clientY - rect.top) / zoomLevel;
+    
+    // Scale to actual canvas pixel coordinates
+    var pixelY = canvasY * (canvas.height / canvas.offsetHeight);
+    
+    return pixelY;
 }
 
 // Clear button
@@ -770,12 +777,15 @@ function updateZoom() {
     canvas.style.transformOrigin = 'top left';
     document.getElementById('zoomLevel').textContent = Math.round(zoomLevel * 100) + '%';
     
-    // Keep canvas container at fixed size, only zoom the content
-    // Container will scroll when zoomed content exceeds bounds due to overflow-auto
+    // Always use crosshair cursor for drawing
+    canvas.style.cursor = 'crosshair';
+    
+    // Show/hide pan controls based on zoom level
+    const panControls = document.getElementById('panControls');
     if (zoomLevel > 1) {
-        canvas.style.cursor = 'move';
+        panControls.classList.remove('hidden');
     } else {
-        canvas.style.cursor = 'crosshair';
+        panControls.classList.add('hidden');
     }
 }
 
@@ -828,51 +838,31 @@ canvasContainer.addEventListener('wheel', function(e) {
     }
 }, { passive: true });
 
-// Pan functionality when zoomed
-canvasContainer.addEventListener('mousedown', function(e) {
-    // Pan with middle mouse button or spacebar + left click when zoomed
-    if (zoomLevel > 1 && (e.button === 1 || (e.button === 0 && isSpacePressed))) {
-        isPanning = true;
-        panStartX = e.clientX;
-        panStartY = e.clientY;
-        scrollLeft = canvasContainer.scrollLeft;
-        scrollTop = canvasContainer.scrollTop;
-        canvasContainer.style.cursor = 'grabbing';
-    }
+// Pan functionality with buttons
+const panStep = 50; // pixels to pan per button click
+
+document.getElementById('panUpBtn').addEventListener('click', function() {
+    canvasContainer.scrollTop -= panStep;
 });
 
-document.addEventListener('mousemove', function(e) {
-    if (isPanning) {
-        const deltaX = e.clientX - panStartX;
-        const deltaY = e.clientY - panStartY;
-        canvasContainer.scrollLeft = scrollLeft - deltaX;
-        canvasContainer.scrollTop = scrollTop - deltaY;
-    }
+document.getElementById('panDownBtn').addEventListener('click', function() {
+    canvasContainer.scrollTop += panStep;
 });
 
-document.addEventListener('mouseup', function(e) {
-    if (isPanning) {
-        isPanning = false;
-        canvasContainer.style.cursor = zoomLevel > 1 ? (isSpacePressed ? 'grab' : 'move') : '';
-    }
+document.getElementById('panLeftBtn').addEventListener('click', function() {
+    canvasContainer.scrollLeft -= panStep;
 });
 
-// Spacebar for pan mode
-document.addEventListener('keydown', function(e) {
-    if (e.code === 'Space' && zoomLevel > 1 && !drawing) {
-        e.preventDefault();
-        isSpacePressed = true;
-        canvasContainer.style.cursor = 'grab';
-    }
+document.getElementById('panRightBtn').addEventListener('click', function() {
+    canvasContainer.scrollLeft += panStep;
 });
 
-document.addEventListener('keyup', function(e) {
-    if (e.code === 'Space') {
-        isSpacePressed = false;
-        if (zoomLevel > 1 && !isPanning) {
-            canvasContainer.style.cursor = 'move';
-        }
-    }
+document.getElementById('panCenterBtn').addEventListener('click', function() {
+    // Center the canvas in the container
+    const maxScrollLeft = canvasContainer.scrollWidth - canvasContainer.clientWidth;
+    const maxScrollTop = canvasContainer.scrollHeight - canvasContainer.clientHeight;
+    canvasContainer.scrollLeft = maxScrollLeft / 2;
+    canvasContainer.scrollTop = maxScrollTop / 2;
 });
 
 // Confirm save
