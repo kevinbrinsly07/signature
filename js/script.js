@@ -430,7 +430,7 @@ canvas.addEventListener('touchstart', function(e) {
         // One finger: start drawing
         startDrawing(e);
     }
-});
+}, { passive: true });
 
 canvas.addEventListener('touchend', function(e) {
     const touches = e.touches;
@@ -818,7 +818,7 @@ canvasContainer.addEventListener('wheel', function(e) {
             canvasContainer.scrollTop += scrollY;
         }
     }
-});
+}, { passive: true });
 
 // Pan functionality when zoomed
 canvasContainer.addEventListener('mousedown', function(e) {
