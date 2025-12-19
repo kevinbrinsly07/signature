@@ -103,9 +103,11 @@
                          <!-- Page Indicator -->
                          <div id="pageIndicator" class="text-center text-sm text-gray-600 mb-2">
                          </div>
-                         <canvas id="signatureCanvas" width="800" height="450"
-                              class="border-[1px] border-[#D1D5DC] rounded-[16px] bg-white shadow-lg cursor-crosshair w-full h-auto max-w-full mx-auto block">
-                         </canvas>
+                         <div id="canvasContainer" class="border-[1px] border-[#D1D5DC] rounded-[16px] overflow-auto relative" style="max-height: 600px; max-width: 800px;">
+                              <canvas id="signatureCanvas" width="800" height="450"
+                                   class="bg-white shadow-lg cursor-crosshair mx-auto block" style="max-width: 100%; height: auto;">
+                              </canvas>
+                         </div>
                          <!-- Page Navigation -->
                          <div id="pageNav" class="hidden flex justify-center items-center gap-4 mt-4">
                               <button id="prevPageBtn"
@@ -168,6 +170,22 @@
 
                          </div>
 
+                    </div>
+
+                    <!-- Zoom Controls -->
+                    <div id="zoomControls" class="hidden xl:w-full bg-[#FFFFFF] shadow-2xl rounded-[24px] flex-row gap-3 justify-center items-center py-4 px-4 text-[14px] mt-5">
+                         <button id="zoomOutBtn" class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
+                              <i class="fas fa-search-minus text-[#0A0A0A]"></i>
+                         </button>
+                         <div class="flex-1 text-center">
+                              <span id="zoomLevel" class="text-[#0A0A0A] font-medium">100%</span>
+                         </div>
+                         <button id="zoomInBtn" class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
+                              <i class="fas fa-search-plus text-[#0A0A0A]"></i>
+                         </button>
+                         <button id="zoomResetBtn" class="bg-[#155DFC] text-white rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#0D4ACF] transition-all">
+                              <i class="fas fa-compress-arrows-alt"></i>
+                         </button>
                     </div>
 
                </div>

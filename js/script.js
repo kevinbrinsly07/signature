@@ -27,6 +27,21 @@ let pdfDocument = null; // Store the PDF document for multi-page navigation
 let currentPageNum = 1;
 let renderScale = 1; // Scale factor for rendering (1 for images, 2 for PDFs)
 let originalPdfData = null; // Store original PDF bytes for saving
+let originalDimensions = {}; // Store original dimensions of each page before scaling
+let canvasScaleRatio = 1; // Ratio between display canvas and original document
+
+// Zoom variables
+let zoomLevel = 1.0;
+let minZoom = 0.5;
+let maxZoom = 3.0;
+let zoomStep = 0.25;
+let canvasContainer = document.getElementById('canvasContainer');
+let isPanning = false;
+let panStartX = 0;
+let panStartY = 0;
+let scrollLeft = 0;
+let scrollTop = 0;
+let isSpacePressed = false;
 
 // Set drawing properties
 ctx.strokeStyle = '#000000';
@@ -91,12 +106,17 @@ async function handleFileImport(file) {
         // Clear any existing signature when loading a new document
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (backgroundImage) {
-            ctx.drawImage(backgroundImage, 0, 0);
+            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
         }
         undoStack = [];
         
-        // Update line width for current scale
-        ctx.lineWidth = baseWidth * renderScale;
+        // Update line width - since we draw at full res, scale the line width
+        const displayScale = canvas.width / parseFloat(canvas.style.width || canvas.width);
+        ctx.lineWidth = baseWidth * displayScale;
+        
+        // Show zoom controls when document is loaded
+        document.getElementById('zoomControls').classList.remove('hidden');
+        document.getElementById('zoomControls').classList.add('flex');
         
         // Update page navigation
         updatePageNavigation();
@@ -191,9 +211,33 @@ async function loadPage(pageNum) {
         const scale = 2; // Higher scale for better quality
         const viewport = page.getViewport({scale: scale});
         
-        // Set canvas to page size
+        // Store original dimensions and set canvas to full resolution
+        originalDimensions[pageNum] = {
+            width: viewport.width,
+            height: viewport.height
+        };
+        
+        // Always set canvas to FULL original resolution
         canvas.width = viewport.width;
         canvas.height = viewport.height;
+        
+        // Calculate display width for CSS scaling
+        const maxDisplayWidth = 800;
+        let displayWidth = viewport.width;
+        let displayHeight = viewport.height;
+        
+        if (viewport.width > maxDisplayWidth) {
+            const ratio = maxDisplayWidth / viewport.width;
+            displayWidth = maxDisplayWidth;
+            displayHeight = viewport.height * ratio;
+        }
+        
+        // Apply CSS scaling for display only
+        canvas.style.width = displayWidth + 'px';
+        canvas.style.height = displayHeight + 'px';
+        
+        // Scale ratio is 1 since we draw at full resolution
+        canvasScaleRatio = 1;
         
         const renderContext = {
             canvasContext: ctx,
@@ -231,9 +275,36 @@ async function loadImage(file) {
         reader.onload = function(e) {
             backgroundImage = new Image();
             backgroundImage.onload = function() {
-                // Set canvas to image size
+                // Store original dimensions
+                originalDimensions[1] = {
+                    width: backgroundImage.width,
+                    height: backgroundImage.height
+                };
+                
+                // Always set canvas to FULL original resolution
                 canvas.width = backgroundImage.width;
                 canvas.height = backgroundImage.height;
+                
+                // Calculate display dimensions for CSS scaling
+                const maxDisplayWidth = 800;
+                let displayWidth = backgroundImage.width;
+                let displayHeight = backgroundImage.height;
+                
+                if (backgroundImage.width > maxDisplayWidth) {
+                    const ratio = maxDisplayWidth / backgroundImage.width;
+                    displayWidth = maxDisplayWidth;
+                    displayHeight = backgroundImage.height * ratio;
+                }
+                
+                // Apply CSS scaling for display only
+                canvas.style.width = displayWidth + 'px';
+                canvas.style.height = displayHeight + 'px';
+                
+                // Scale ratio is 1 since we draw at full resolution
+                canvasScaleRatio = 1;
+                
+                // Draw the image at full resolution
+                ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height);
                 resolve();
             };
             backgroundImage.onerror = function() {
@@ -256,7 +327,8 @@ document.getElementById('colorPicker').addEventListener('input', function() {
 // Thickness selector
 document.getElementById('thickness').addEventListener('input', function() {
     baseWidth = parseInt(this.value);
-    ctx.lineWidth = baseWidth * renderScale;
+    const displayScale = canvas.width / parseFloat(canvas.style.width || canvas.width);
+    ctx.lineWidth = baseWidth * displayScale;
     document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
 });
 
@@ -327,6 +399,9 @@ document.addEventListener('touchmove', function(e) {
 
 // Function to start drawing
 function startDrawing(e) {
+    // Don't start drawing if panning
+    if (isPanning) return;
+    
     undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
     drawing = true;
     hasStarted = true;
@@ -340,20 +415,21 @@ function startDrawing(e) {
 }
 
 function draw(e) {
-    if (!drawing) return;
+    if (!drawing || isPanning) return;
     let x = getX(e);
     let y = getY(e);
     let currentTime = Date.now();
     let distance = Math.sqrt((x - lastX) ** 2 + (y - lastY) ** 2);
     let timeDiff = currentTime - lastTime;
+    const displayScale = canvas.width / parseFloat(canvas.style.width || canvas.width);
     if (timeDiff > 0) {
         let speed = distance / timeDiff;
         let maxSpeed = 3; // Reduced for more variation
         let factor = Math.min(speed / maxSpeed, 1);
         if (currentMode === 'pen') {
-            ctx.lineWidth = Math.max(baseWidth * (1 - factor * 0.9), 1); // Increased factor for stronger effect
+            ctx.lineWidth = Math.max(baseWidth * displayScale * (1 - factor * 0.9), 1); // Increased factor for stronger effect
         } else {
-            ctx.lineWidth = baseWidth;
+            ctx.lineWidth = baseWidth * displayScale;
         }
     }
     if (!hasStarted) {
@@ -398,7 +474,7 @@ function getY(e) {
 document.getElementById('clearBtn').addEventListener('click', function() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (backgroundImage && isDocumentLoaded) {
-        ctx.drawImage(backgroundImage, 0, 0);
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     }
     undoStack = [];
     // Clear signature for current page
@@ -415,7 +491,7 @@ document.getElementById('undoBtn').addEventListener('click', function() {
     } else if (backgroundImage && isDocumentLoaded) {
         // If no undo history but document is loaded, restore document
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(backgroundImage, 0, 0);
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     }
 });
 
@@ -576,14 +652,134 @@ document.getElementById('fullscreenBtn').addEventListener('click', function() {
     }
 });
 
+// Zoom functionality
+function updateZoom() {
+    canvas.style.transform = `scale(${zoomLevel})`;
+    canvas.style.transformOrigin = 'top left';
+    document.getElementById('zoomLevel').textContent = Math.round(zoomLevel * 100) + '%';
+    
+    // Update canvas container to accommodate zoomed canvas
+    const containerWidth = canvasContainer.clientWidth;
+    const containerHeight = canvasContainer.clientHeight;
+    const canvasWidth = canvas.width * zoomLevel;
+    const canvasHeight = canvas.height * zoomLevel;
+    
+    // Enable scrolling when zoomed in
+    if (zoomLevel > 1) {
+        canvas.style.cursor = 'move';
+    } else {
+        canvas.style.cursor = 'crosshair';
+    }
+}
+
+// Zoom In
+document.getElementById('zoomInBtn').addEventListener('click', function() {
+    if (zoomLevel < maxZoom) {
+        zoomLevel = Math.min(zoomLevel + zoomStep, maxZoom);
+        updateZoom();
+    }
+});
+
+// Zoom Out
+document.getElementById('zoomOutBtn').addEventListener('click', function() {
+    if (zoomLevel > minZoom) {
+        zoomLevel = Math.max(zoomLevel - zoomStep, minZoom);
+        updateZoom();
+    }
+});
+
+// Reset Zoom
+document.getElementById('zoomResetBtn').addEventListener('click', function() {
+    zoomLevel = 1.0;
+    updateZoom();
+    canvasContainer.scrollLeft = 0;
+    canvasContainer.scrollTop = 0;
+});
+
+// Mouse wheel zoom
+canvasContainer.addEventListener('wheel', function(e) {
+    if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -zoomStep : zoomStep;
+        const newZoom = Math.max(minZoom, Math.min(maxZoom, zoomLevel + delta));
+        
+        if (newZoom !== zoomLevel) {
+            // Calculate mouse position relative to canvas
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Calculate scroll position to maintain mouse position
+            const scrollX = (mouseX / zoomLevel) * newZoom - mouseX;
+            const scrollY = (mouseY / zoomLevel) * newZoom - mouseY;
+            
+            zoomLevel = newZoom;
+            updateZoom();
+            
+            canvasContainer.scrollLeft += scrollX;
+            canvasContainer.scrollTop += scrollY;
+        }
+    }
+}, { passive: false });
+
+// Pan functionality when zoomed
+canvasContainer.addEventListener('mousedown', function(e) {
+    // Pan with middle mouse button or spacebar + left click when zoomed
+    if (zoomLevel > 1 && (e.button === 1 || (e.button === 0 && isSpacePressed))) {
+        e.preventDefault();
+        isPanning = true;
+        panStartX = e.clientX;
+        panStartY = e.clientY;
+        scrollLeft = canvasContainer.scrollLeft;
+        scrollTop = canvasContainer.scrollTop;
+        canvasContainer.style.cursor = 'grabbing';
+    }
+});
+
+document.addEventListener('mousemove', function(e) {
+    if (isPanning) {
+        e.preventDefault();
+        const deltaX = e.clientX - panStartX;
+        const deltaY = e.clientY - panStartY;
+        canvasContainer.scrollLeft = scrollLeft - deltaX;
+        canvasContainer.scrollTop = scrollTop - deltaY;
+    }
+});
+
+document.addEventListener('mouseup', function(e) {
+    if (isPanning) {
+        isPanning = false;
+        canvasContainer.style.cursor = zoomLevel > 1 ? (isSpacePressed ? 'grab' : 'move') : '';
+    }
+});
+
+// Spacebar for pan mode
+document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' && zoomLevel > 1 && !drawing) {
+        e.preventDefault();
+        isSpacePressed = true;
+        canvasContainer.style.cursor = 'grab';
+    }
+});
+
+document.addEventListener('keyup', function(e) {
+    if (e.code === 'Space') {
+        isSpacePressed = false;
+        if (zoomLevel > 1 && !isPanning) {
+            canvasContainer.style.cursor = 'move';
+        }
+    }
+});
+
 // Confirm save
 document.getElementById('confirmSave').addEventListener('click', async function() {
     if (pdfDocument) {
         // Save as PDF
         await saveAsPDF();
     } else {
-        // Save as PNG
-        var dataURL = document.getElementById('previewImg').src;
+        // Save as PNG at original resolution
+        const fullResCanvas = createFullResolutionCanvas();
+        var dataURL = fullResCanvas.toDataURL('image/png');
         var link = document.createElement('a');
         var filename = isDocumentLoaded ? 'signed-document.png' : 'signature.png';
         link.download = filename;
@@ -592,6 +788,20 @@ document.getElementById('confirmSave').addEventListener('click', async function(
     }
     closeModal();
 });
+
+// Function to get full resolution canvas (canvas is already at full resolution)
+function createFullResolutionCanvas() {
+    // Canvas is already at full resolution, just return a copy
+    const fullResCanvas = document.createElement('canvas');
+    fullResCanvas.width = canvas.width;
+    fullResCanvas.height = canvas.height;
+    const fullResCtx = fullResCanvas.getContext('2d');
+    
+    // Copy the current canvas content
+    fullResCtx.drawImage(canvas, 0, 0);
+    
+    return fullResCanvas;
+}
 
 // Function to save signed PDF
 async function saveAsPDF() {
@@ -604,7 +814,7 @@ async function saveAsPDF() {
             const pageNum = i + 1;
             
             if (pageSignatures[pageNum]) {
-                // Get signature only by subtracting background
+                // Get signature at full resolution
                 const sigImageData = await getSignatureImageData(pageNum);
                 if (sigImageData) {
                     // Convert to PNG
@@ -647,7 +857,11 @@ async function getSignatureImageData(pageNum) {
     const signedData = pageSignatures[pageNum];
     if (!signedData) return null;
     
-    // Render the background page at same scale
+    // Get original dimensions (should match signedData since we draw at full res now)
+    const origDim = originalDimensions[pageNum];
+    if (!origDim) return null;
+    
+    // Render the background page at full original scale
     const page = await pdfDocument.getPage(pageNum);
     const scale = 2;
     const viewport = page.getViewport({scale: scale});
@@ -665,6 +879,7 @@ async function getSignatureImageData(pageNum) {
     await page.render(renderContext).promise;
     const bgData = bgCtx.getImageData(0, 0, viewport.width, viewport.height);
     
+    // SignedData is already at full resolution, no need to scale
     // Create signature ImageData by comparing pixels
     const sigData = new ImageData(signedData.width, signedData.height);
     const signedPixels = signedData.data;
