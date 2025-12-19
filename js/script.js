@@ -685,22 +685,42 @@ var originalBtnParent = fullscreenBtn.parentElement;
 var mainContainer = document.querySelector('.max-w-7xl');
 var originalCanvasWidth = canvas.width;
 var originalCanvasHeight = canvas.height;
+var fullscreenSignatureData = null; // Store signature data from fullscreen mode
 document.getElementById('fullscreenBtn').addEventListener('click', function() {
     if (!isFullscreen) {
         // Enter full screen
         // Store original canvas size
         originalCanvasWidth = canvas.width;
         originalCanvasHeight = canvas.height;
-        
+
+        // Save current signature data before resizing
+        if (isDocumentLoaded) {
+            fullscreenSignatureData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
         // Resize canvas to screen size
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        
-        // Redraw content if document is loaded
+
+        // Clear canvas and redraw background at new size
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (isDocumentLoaded && backgroundImage) {
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
         }
-        
+
+        // Scale and restore signature data to new canvas size
+        if (fullscreenSignatureData) {
+            // Create a temporary canvas for scaling
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = originalCanvasWidth;
+            tempCanvas.height = originalCanvasHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.putImageData(fullscreenSignatureData, 0, 0);
+
+            // Draw scaled signature onto main canvas
+            ctx.drawImage(tempCanvas, 0, 0, originalCanvasWidth, originalCanvasHeight, 0, 0, canvas.width, canvas.height);
+        }
+
         document.body.appendChild(canvas);
         canvas.style.position = 'fixed';
         canvas.style.top = '0';
@@ -708,7 +728,7 @@ document.getElementById('fullscreenBtn').addEventListener('click', function() {
         canvas.style.width = '100vw';
         canvas.style.height = '100vh';
         canvas.style.zIndex = '9999';
-        
+
         // Move button to body
         document.body.appendChild(fullscreenBtn);
         fullscreenBtn.style.position = 'fixed';
@@ -716,25 +736,47 @@ document.getElementById('fullscreenBtn').addEventListener('click', function() {
         fullscreenBtn.style.right = '20px';
         fullscreenBtn.style.zIndex = '10000';
         fullscreenBtn.style.height = '48px'; // Increase height for longer text
-        
+
         // Hide main container
         if (mainContainer) mainContainer.style.display = 'none';
         document.body.style.overflow = 'hidden';
-        
+
         // Update button content
         fullscreenBtn.innerHTML = '<i class="fas fa-compress mr-2 text-[#0A0A0A]"></i><div class="text-[#0A0A0A]">Exit Full Screen</div>';
         isFullscreen = true;
     } else {
         // Exit full screen
+        // Save current fullscreen signature data
+        const currentFullscreenData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
         // Restore original canvas size
         canvas.width = originalCanvasWidth;
         canvas.height = originalCanvasHeight;
-        
-        // Redraw content if document is loaded
+
+        // Clear canvas and redraw background at original size
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (isDocumentLoaded && backgroundImage) {
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
         }
-        
+
+        // Scale fullscreen signature data back to original size
+        if (currentFullscreenData) {
+            // Create a temporary canvas for scaling
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = window.innerWidth;
+            tempCanvas.height = window.innerHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.putImageData(currentFullscreenData, 0, 0);
+
+            // Draw scaled signature back onto main canvas
+            ctx.drawImage(tempCanvas, 0, 0, window.innerWidth, window.innerHeight, 0, 0, canvas.width, canvas.height);
+        }
+
+        // Update the stored signature data for the current page
+        if (isDocumentLoaded) {
+            pageSignatures[currentPageNum] = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
         originalParent.appendChild(canvas);
         canvas.style.position = '';
         canvas.style.top = '';
@@ -742,7 +784,7 @@ document.getElementById('fullscreenBtn').addEventListener('click', function() {
         canvas.style.width = '';
         canvas.style.height = '';
         canvas.style.zIndex = '';
-        
+
         // Move button back
         originalBtnParent.appendChild(fullscreenBtn);
         fullscreenBtn.style.position = '';
@@ -750,14 +792,15 @@ document.getElementById('fullscreenBtn').addEventListener('click', function() {
         fullscreenBtn.style.right = '';
         fullscreenBtn.style.zIndex = '';
         fullscreenBtn.style.height = ''; // Restore original height
-        
+
         // Show main container
         if (mainContainer) mainContainer.style.display = '';
         document.body.style.overflow = '';
-        
+
         // Update button content
         fullscreenBtn.innerHTML = '<img src="./assets/fullScreen-icon.svg" /><span class="text-[#0A0A0A]">Full Screen</span>';
         isFullscreen = false;
+        fullscreenSignatureData = null; // Clear stored data
     }
 });
 
