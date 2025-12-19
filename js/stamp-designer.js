@@ -249,6 +249,11 @@ class StampDesigner {
         this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
         this.canvas.addEventListener('mouseleave', (e) => this.handleMouseUp(e));
 
+        // Canvas touch events for mobile dragging
+        this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+        this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+        this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+
         // Keyboard events for deletion, copy, and paste
         document.addEventListener('keydown', (e) => {
             // Don't handle deletion if user is typing in an input field
@@ -1020,6 +1025,37 @@ class StampDesigner {
 
     handleMouseUp() {
         this.isDragging = false;
+    }
+
+    handleTouchStart(e) {
+        e.preventDefault(); // Prevent scrolling
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            // Create a fake mouse event from touch coordinates
+            const fakeMouseEvent = {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            };
+            this.handleMouseDown(fakeMouseEvent);
+        }
+    }
+
+    handleTouchMove(e) {
+        e.preventDefault(); // Prevent scrolling
+        if (e.touches.length === 1 && this.isDragging) {
+            const touch = e.touches[0];
+            // Create a fake mouse event from touch coordinates
+            const fakeMouseEvent = {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            };
+            this.handleMouseMove(fakeMouseEvent);
+        }
+    }
+
+    handleTouchEnd(e) {
+        e.preventDefault(); // Prevent scrolling
+        this.handleMouseUp();
     }
 
     deleteSelectedElement() {
