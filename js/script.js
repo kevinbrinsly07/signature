@@ -30,6 +30,9 @@ let originalPdfData = null; // Store original PDF bytes for saving
 let originalDimensions = {}; // Store original dimensions of each page before scaling
 let canvasScaleRatio = 1; // Ratio between display canvas and original document
 
+// Separate signature storage per page
+let pageSignatures = {}; // Will store signature ImageData per page
+
 // Zoom variables
 let zoomLevel = 1.0;
 let minZoom = 0.5;
@@ -42,6 +45,15 @@ let panStartY = 0;
 let scrollLeft = 0;
 let scrollTop = 0;
 let isSpacePressed = false;
+
+// Touch zoom and pan variables
+let initialPinchDistance = 0;
+let initialZoomLevel = 1.0;
+let isPinching = false;
+let lastTouchX = 0;
+let lastTouchY = 0;
+let touchScrollLeft = 0;
+let touchScrollTop = 0;
 
 // Set drawing properties
 ctx.strokeStyle = '#000000';
@@ -111,7 +123,7 @@ async function handleFileImport(file) {
         undoStack = [];
         
         // Update line width - since we draw at full res, scale the line width
-        const displayScale = canvas.width / parseFloat(canvas.style.width || canvas.width);
+        const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) * zoomLevel;
         ctx.lineWidth = baseWidth * displayScale;
         
         // Show zoom controls when document is loaded
@@ -221,6 +233,16 @@ async function loadPage(pageNum) {
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         
+        // Initialize signature canvas with same dimensions
+        signatureCanvas = document.createElement('canvas');
+        signatureCanvas.width = viewport.width;
+        signatureCanvas.height = viewport.height;
+        signatureCtx = signatureCanvas.getContext('2d');
+        signatureCtx.strokeStyle = '#000000';
+        signatureCtx.lineWidth = baseWidth;
+        signatureCtx.lineCap = 'round';
+        signatureCtx.lineJoin = 'round';
+        
         // Calculate display width for CSS scaling - responsive for mobile
         const containerWidth = canvasContainer.clientWidth || 800;
         const maxDisplayWidth = Math.min(800, containerWidth - 20); // 20px padding
@@ -253,6 +275,10 @@ async function loadPage(pageNum) {
         
         return new Promise((resolve, reject) => {
             backgroundImage.onload = () => {
+                // Clear and redraw background
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(backgroundImage, 0, 0);
+
                 // Restore signature if exists
                 if (pageSignatures[pageNum]) {
                     ctx.putImageData(pageSignatures[pageNum], 0, 0);
@@ -329,7 +355,7 @@ document.getElementById('colorPicker').addEventListener('input', function() {
 // Thickness selector
 document.getElementById('thickness').addEventListener('input', function() {
     baseWidth = parseInt(this.value);
-    const displayScale = canvas.width / parseFloat(canvas.style.width || canvas.width);
+    const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) * zoomLevel;
     ctx.lineWidth = baseWidth * displayScale;
     document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
 });
@@ -387,28 +413,80 @@ document.addEventListener('mousemove', draw);
 
 // Touch events for mobile
 canvas.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    startDrawing(e);
+    const touches = e.touches;
+
+    if (touches.length === 2) {
+        // Two fingers: start pinch zoom and pan
+        e.preventDefault();
+        isPinching = true;
+        initialPinchDistance = getTouchDistance(touches);
+        initialZoomLevel = zoomLevel;
+        // Also prepare for panning
+        const center = getTouchCenter(touches);
+        lastTouchX = center.x;
+        lastTouchY = center.y;
+        touchScrollLeft = canvasContainer.scrollLeft;
+        touchScrollTop = canvasContainer.scrollTop;
+    } else if (touches.length === 1) {
+        // One finger: start drawing
+        startDrawing(e);
+    }
 }, { passive: false });
+
 canvas.addEventListener('touchend', function(e) {
-    e.preventDefault();
-    stopDrawing();
+    const touches = e.touches;
+    
+    if (touches.length === 0) {
+        // End all touch interactions
+        isPinching = false;
+        isPanning = false;
+        stopDrawing();
+    }
 }, { passive: false });
+
 document.addEventListener('touchmove', function(e) {
-    if (e.touches.length === 1) {
+    const touches = e.touches;
+
+    if (touches.length === 2 && isPinching) {
+        // Two fingers: handle both pinch zoom and pan simultaneously
+        e.preventDefault();
+
+        // Handle pinch zoom
+        const currentDistance = getTouchDistance(touches);
+        const scale = currentDistance / initialPinchDistance;
+        const newZoomLevel = Math.max(minZoom, Math.min(maxZoom, initialZoomLevel * scale));
+
+        if (newZoomLevel !== zoomLevel) {
+            zoomLevel = newZoomLevel;
+            updateZoom();
+        }
+
+        // Handle pan with two fingers
+        const center = getTouchCenter(touches);
+        const deltaX = center.x - lastTouchX;
+        const deltaY = center.y - lastTouchY;
+
+        canvasContainer.scrollLeft = touchScrollLeft - deltaX;
+        canvasContainer.scrollTop = touchScrollTop - deltaY;
+
+        lastTouchX = center.x;
+        lastTouchY = center.y;
+
+    } else if (touches.length === 1 && drawing) {
+        // One finger: handle drawing only
         e.preventDefault();
         draw(e);
     }
-    // For multi-touch (2+ fingers), allow default behavior for zoom/pan
+    // For other cases, allow default behavior
 }, { passive: false });
 
 // Function to start drawing
 function startDrawing(e) {
-    // Only start drawing with single touch
-    if (e.touches && e.touches.length > 1) return;
-    // Don't start drawing if panning
-    if (isPanning) return;
-    
+    // Only start drawing with single touch (one finger)
+    if (e.touches && e.touches.length !== 1) return;
+    // Don't start drawing if already pinching (two fingers)
+    if (isPinching) return;
+
     undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
     drawing = true;
     hasStarted = true;
@@ -428,7 +506,7 @@ function draw(e) {
     let currentTime = Date.now();
     let distance = Math.sqrt((x - lastX) ** 2 + (y - lastY) ** 2);
     let timeDiff = currentTime - lastTime;
-    const displayScale = canvas.width / parseFloat(canvas.style.width || canvas.width);
+    const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) * zoomLevel;
     if (timeDiff > 0) {
         let speed = distance / timeDiff;
         let maxSpeed = 3; // Reduced for more variation
@@ -454,27 +532,29 @@ function draw(e) {
 
 // Function to stop drawing
 function stopDrawing() {
+    if (drawing && isDocumentLoaded) {
+        // Save signature data for current page
+        pageSignatures[currentPageNum] = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
     drawing = false;
 }
 
 // Helper function to get X coordinate from event
 
-function stopDrawing() {
-    drawing = false;
-}
-
-// Helper function to get Y coordinate from event
-
 function getX(e) {
     var rect = canvas.getBoundingClientRect();
-    var scaleX = canvas.width / rect.width;
-    return ((e.clientX || e.touches[0].clientX) - rect.left) * scaleX;
+    // Account for CSS zoom scaling: rect dimensions are visual, canvas dimensions are actual pixels
+    var visualScaleX = rect.width / canvas.offsetWidth; // CSS scaling factor
+    var pixelScaleX = canvas.width / canvas.offsetWidth; // Base pixel ratio
+    return ((e.clientX || e.touches[0].clientX) - rect.left) * (pixelScaleX / visualScaleX);
 }
 
 function getY(e) {
     var rect = canvas.getBoundingClientRect();
-    var scaleY = canvas.height / rect.height;
-    return ((e.clientY || e.touches[0].clientY) - rect.top) * scaleY;
+    // Account for CSS zoom scaling: rect dimensions are visual, canvas dimensions are actual pixels
+    var visualScaleY = rect.height / canvas.offsetHeight; // CSS scaling factor
+    var pixelScaleY = canvas.height / canvas.offsetHeight; // Base pixel ratio
+    return ((e.clientY || e.touches[0].clientY) - rect.top) * (pixelScaleY / visualScaleY);
 }
 
 // Clear button
@@ -483,11 +563,13 @@ document.getElementById('clearBtn').addEventListener('click', function() {
     if (backgroundImage && isDocumentLoaded) {
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     }
-    undoStack = [];
+    
     // Clear signature for current page
-    if (pdfDocument) {
+    if (isDocumentLoaded) {
         delete pageSignatures[currentPageNum];
     }
+    
+    undoStack = [];
 });
 
 // Undo button
@@ -659,19 +741,33 @@ document.getElementById('fullscreenBtn').addEventListener('click', function() {
     }
 });
 
+// Helper functions for touch zoom
+function getTouchDistance(touches) {
+    const touch1 = touches[0];
+    const touch2 = touches[1];
+    return Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) + 
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+    );
+}
+
+function getTouchCenter(touches) {
+    const touch1 = touches[0];
+    const touch2 = touches[1];
+    return {
+        x: (touch1.clientX + touch2.clientX) / 2,
+        y: (touch1.clientY + touch2.clientY) / 2
+    };
+}
+
 // Zoom functionality
 function updateZoom() {
     canvas.style.transform = `scale(${zoomLevel})`;
     canvas.style.transformOrigin = 'top left';
     document.getElementById('zoomLevel').textContent = Math.round(zoomLevel * 100) + '%';
     
-    // Update canvas container to accommodate zoomed canvas
-    const containerWidth = canvasContainer.clientWidth;
-    const containerHeight = canvasContainer.clientHeight;
-    const canvasWidth = canvas.width * zoomLevel;
-    const canvasHeight = canvas.height * zoomLevel;
-    
-    // Enable scrolling when zoomed in
+    // Keep canvas container at fixed size, only zoom the content
+    // Container will scroll when zoomed content exceeds bounds due to overflow-auto
     if (zoomLevel > 1) {
         canvas.style.cursor = 'move';
     } else {
@@ -820,10 +916,20 @@ async function saveAsPDF() {
             const page = pages[i];
             const pageNum = i + 1;
             
-            if (pageSignatures[pageNum]) {
-                // Get signature at full resolution
-                const sigImageData = await getSignatureImageData(pageNum);
-                if (sigImageData) {
+            // Check if there's signature data on the signature canvas
+            const sigImageData = await getSignatureImageData(pageNum);
+            if (sigImageData) {
+                // Check if signature has any non-transparent pixels
+                let hasSignature = false;
+                const pixels = sigImageData.data;
+                for (let j = 3; j < pixels.length; j += 4) {
+                    if (pixels[j] > 0) { // Alpha channel > 0
+                        hasSignature = true;
+                        break;
+                    }
+                }
+                
+                if (hasSignature) {
                     // Convert to PNG
                     const sigCanvas = document.createElement('canvas');
                     sigCanvas.width = sigImageData.width;
@@ -863,43 +969,47 @@ async function saveAsPDF() {
 async function getSignatureImageData(pageNum) {
     const signedData = pageSignatures[pageNum];
     if (!signedData) return null;
-    
-    // Get original dimensions (should match signedData since we draw at full res now)
+
+    // Get original dimensions
     const origDim = originalDimensions[pageNum];
     if (!origDim) return null;
-    
-    // Render the background page at full original scale
+
+    // Create signature ImageData by comparing with background
+    // For reliability, we'll create a clean background and compare
     const page = await pdfDocument.getPage(pageNum);
-    const scale = 2;
-    const viewport = page.getViewport({scale: scale});
-    
+    const viewport = page.getViewport({scale: 2});
+
     const bgCanvas = document.createElement('canvas');
     bgCanvas.width = viewport.width;
     bgCanvas.height = viewport.height;
     const bgCtx = bgCanvas.getContext('2d');
-    
+
     const renderContext = {
         canvasContext: bgCtx,
         viewport: viewport
     };
-    
+
     await page.render(renderContext).promise;
     const bgData = bgCtx.getImageData(0, 0, viewport.width, viewport.height);
-    
-    // SignedData is already at full resolution, no need to scale
-    // Create signature ImageData by comparing pixels
+
+    // Create signature ImageData
     const sigData = new ImageData(signedData.width, signedData.height);
     const signedPixels = signedData.data;
     const bgPixels = bgData.data;
     const sigPixels = sigData.data;
-    
+
+    // Simple difference check with some tolerance for rendering variations
     for (let i = 0; i < signedPixels.length; i += 4) {
-        // If pixels differ, it's signature
-        if (signedPixels[i] !== bgPixels[i] || signedPixels[i+1] !== bgPixels[i+1] || signedPixels[i+2] !== bgPixels[i+2] || signedPixels[i+3] !== bgPixels[i+3]) {
+        const rDiff = Math.abs(signedPixels[i] - bgPixels[i]);
+        const gDiff = Math.abs(signedPixels[i+1] - bgPixels[i+1]);
+        const bDiff = Math.abs(signedPixels[i+2] - bgPixels[i+2]);
+
+        // If colors differ significantly, it's signature
+        if (rDiff > 5 || gDiff > 5 || bDiff > 5) {
             sigPixels[i] = signedPixels[i];     // R
             sigPixels[i+1] = signedPixels[i+1]; // G
             sigPixels[i+2] = signedPixels[i+2]; // B
-            sigPixels[i+3] = signedPixels[i+3]; // A
+            sigPixels[i+3] = 255; // Opaque
         } else {
             sigPixels[i] = 0;
             sigPixels[i+1] = 0;
@@ -907,7 +1017,7 @@ async function getSignatureImageData(pageNum) {
             sigPixels[i+3] = 0; // Transparent
         }
     }
-    
+
     return sigData;
 }
 // Function to close the preview modal
@@ -949,7 +1059,7 @@ function adjustCanvasDisplay() {
         canvas.style.height = displayHeight + 'px';
         
         // Update line width
-        const displayScale = canvas.width / parseFloat(canvas.style.width || canvas.width);
+        const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) * zoomLevel;
         ctx.lineWidth = baseWidth * displayScale;
     }
 }
@@ -1090,3 +1200,6 @@ document.getElementById('colorOrange').addEventListener('click', function() {
     ctx.strokeStyle = '#EA580C';
     setColorButton(this);
 });
+
+// Initialize zoom display
+updateZoom();
