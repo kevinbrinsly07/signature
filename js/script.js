@@ -221,8 +221,9 @@ async function loadPage(pageNum) {
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         
-        // Calculate display width for CSS scaling
-        const maxDisplayWidth = 800;
+        // Calculate display width for CSS scaling - responsive for mobile
+        const containerWidth = canvasContainer.clientWidth || 800;
+        const maxDisplayWidth = Math.min(800, containerWidth - 20); // 20px padding
         let displayWidth = viewport.width;
         let displayHeight = viewport.height;
         
@@ -285,8 +286,9 @@ async function loadImage(file) {
                 canvas.width = backgroundImage.width;
                 canvas.height = backgroundImage.height;
                 
-                // Calculate display dimensions for CSS scaling
-                const maxDisplayWidth = 800;
+                // Calculate display dimensions for CSS scaling - responsive for mobile
+                const containerWidth = canvasContainer.clientWidth || 800;
+                const maxDisplayWidth = Math.min(800, containerWidth - 20); // 20px padding
                 let displayWidth = backgroundImage.width;
                 let displayHeight = backgroundImage.height;
                 
@@ -920,6 +922,44 @@ function closeModal() {
         modal.classList.add('hidden');
     }, 300);
 }
+
+// Handle window resize for mobile responsiveness
+function adjustCanvasDisplay() {
+    if (isDocumentLoaded && canvas.width > 0) {
+        const containerWidth = canvasContainer.clientWidth || 800;
+        const maxDisplayWidth = Math.min(800, containerWidth - 20);
+        const origWidth = canvas.width;
+        const origHeight = canvas.height;
+        
+        let displayWidth = origWidth;
+        let displayHeight = origHeight;
+        
+        if (origWidth > maxDisplayWidth) {
+            const ratio = maxDisplayWidth / origWidth;
+            displayWidth = maxDisplayWidth;
+            displayHeight = origHeight * ratio;
+        }
+        
+        canvas.style.width = displayWidth + 'px';
+        canvas.style.height = displayHeight + 'px';
+        
+        // Update line width
+        const displayScale = canvas.width / parseFloat(canvas.style.width || canvas.width);
+        ctx.lineWidth = baseWidth * displayScale;
+    }
+}
+
+// Debounce resize events
+let resizeTimeout;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(adjustCanvasDisplay, 250);
+});
+
+// Handle orientation change on mobile
+window.addEventListener('orientationchange', function() {
+    setTimeout(adjustCanvasDisplay, 300);
+});
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
