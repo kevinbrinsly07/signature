@@ -264,19 +264,31 @@ document.getElementById('thickness').addEventListener('input', function() {
 document.getElementById('penMode').addEventListener('click', function() {
     currentMode = 'pen';
     ctx.globalCompositeOperation = 'source-over'; // Normal drawing
-    this.classList.add('bg-blue-700');
-    this.classList.remove('bg-blue-600');
-    document.getElementById('eraserMode').classList.remove('bg-gray-700');
-    document.getElementById('eraserMode').classList.add('bg-gray-600');
+    // Set pen mode as selected
+    this.classList.remove('border-[#E5E7EB]');
+    this.classList.add('border-[#155DFC]');
+    this.querySelector('h3').classList.remove('text-[#4A5565]');
+    this.querySelector('h3').classList.add('text-[#155DFC]');
+    // Set eraser mode as unselected
+    document.getElementById('eraserMode').classList.remove('border-[#155DFC]');
+    document.getElementById('eraserMode').classList.add('border-[#E5E7EB]');
+    document.getElementById('eraserMode').querySelector('h3').classList.remove('text-[#155DFC]');
+    document.getElementById('eraserMode').querySelector('h3').classList.add('text-[#4A5565]');
 });
 
 document.getElementById('eraserMode').addEventListener('click', function() {
     currentMode = 'eraser';
     ctx.globalCompositeOperation = 'destination-out'; // Erase mode
-    this.classList.add('bg-gray-700');
-    this.classList.remove('bg-gray-600');
-    document.getElementById('penMode').classList.remove('bg-blue-700');
-    document.getElementById('penMode').classList.add('bg-blue-600');
+    // Set eraser mode as selected
+    this.classList.remove('border-[#E5E7EB]');
+    this.classList.add('border-[#155DFC]');
+    this.querySelector('h3').classList.remove('text-[#4A5565]');
+    this.querySelector('h3').classList.add('text-[#155DFC]');
+    // Set pen mode as unselected
+    document.getElementById('penMode').classList.remove('border-[#155DFC]');
+    document.getElementById('penMode').classList.add('border-[#E5E7EB]');
+    document.getElementById('penMode').querySelector('h3').classList.remove('text-[#155DFC]');
+    document.getElementById('penMode').querySelector('h3').classList.add('text-[#4A5565]');
 });
 
 // Mouse events
@@ -719,16 +731,30 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Initialize pen mode as active
-document.getElementById('penMode').classList.add('bg-blue-700');
-document.getElementById('penMode').classList.remove('bg-blue-600');
+// Pen mode is already set as active in HTML with border-[#155DFC]
 
 // Thickness options
+function setThicknessButton(button) {
+    // Remove selection from all thickness buttons
+    document.querySelectorAll('[id$="Thickness"]').forEach(btn => {
+        btn.classList.remove('border-[#155DFC]');
+        btn.classList.add('border-[#E5E7EB]');
+        btn.querySelector('h3').classList.remove('text-[#155DFC]');
+        btn.querySelector('h3').classList.add('text-[#4A5565]');
+    });
+    // Set selected button
+    button.classList.remove('border-[#E5E7EB]');
+    button.classList.add('border-[#155DFC]');
+    button.querySelector('h3').classList.remove('text-[#4A5565]');
+    button.querySelector('h3').classList.add('text-[#155DFC]');
+}
+
 document.getElementById('thinThickness').addEventListener('click', function() {
     baseWidth = 2;
     ctx.lineWidth = baseWidth * renderScale;
     document.getElementById('thickness').value = baseWidth;
     document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
+    setThicknessButton(this);
 });
 
 document.getElementById('mediumThickness').addEventListener('click', function() {
@@ -736,6 +762,7 @@ document.getElementById('mediumThickness').addEventListener('click', function() 
     ctx.lineWidth = baseWidth * renderScale;
     document.getElementById('thickness').value = baseWidth;
     document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
+    setThicknessButton(this);
 });
 
 document.getElementById('thickThickness').addEventListener('click', function() {
@@ -743,6 +770,7 @@ document.getElementById('thickThickness').addEventListener('click', function() {
     ctx.lineWidth = baseWidth * renderScale;
     document.getElementById('thickness').value = baseWidth;
     document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
+    setThicknessButton(this);
 });
 
 document.getElementById('boldThickness').addEventListener('click', function() {
@@ -750,35 +778,55 @@ document.getElementById('boldThickness').addEventListener('click', function() {
     ctx.lineWidth = baseWidth * renderScale;
     document.getElementById('thickness').value = baseWidth;
     document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
+    setThicknessButton(this);
 });
 
 // Color options
+function setColorButton(button) {
+    // Remove selection from all color buttons
+    document.querySelectorAll('[id^="color"]').forEach(btn => {
+        if (btn.id !== 'colorPicker') {
+            btn.classList.remove('border-white', 'border-[#155DFC]');
+            btn.classList.add('border-transparent');
+        }
+    });
+    // Set selected button with white border (visible on all colors)
+    button.classList.remove('border-transparent');
+    button.classList.add('border-white');
+}
+
 document.getElementById('colorBlack').addEventListener('click', function() {
     document.getElementById('colorPicker').value = '#000000';
     ctx.strokeStyle = '#000000';
+    setColorButton(this);
 });
 
 document.getElementById('colorBlue').addEventListener('click', function() {
     document.getElementById('colorPicker').value = '#2563EB';
     ctx.strokeStyle = '#2563EB';
+    setColorButton(this);
 });
 
 document.getElementById('colorRed').addEventListener('click', function() {
     document.getElementById('colorPicker').value = '#DC2626';
     ctx.strokeStyle = '#DC2626';
+    setColorButton(this);
 });
 
 document.getElementById('colorGreen').addEventListener('click', function() {
     document.getElementById('colorPicker').value = '#059669';
     ctx.strokeStyle = '#059669';
+    setColorButton(this);
 });
 
 document.getElementById('colorPurple').addEventListener('click', function() {
     document.getElementById('colorPicker').value = '#7C3AED';
     ctx.strokeStyle = '#7C3AED';
+    setColorButton(this);
 });
 
 document.getElementById('colorOrange').addEventListener('click', function() {
     document.getElementById('colorPicker').value = '#EA580C';
     ctx.strokeStyle = '#EA580C';
+    setColorButton(this);
 });

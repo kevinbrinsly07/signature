@@ -28,16 +28,16 @@
             <!-- middle -->
             <div
                 class="flex flex-col sm:flex-row md:min-w-[270px] border-[1px] border-[#E5E7EB] shadow-2xl text-[12px] rounded-[20px] p-2">
-                <div class="bg-[#FFFFFF] p-2 rounded-[14px] text-[#000000] flex justify-center items-center flex-1"
-                    onclick="window.location.href='index.html'" style="cursor: pointer;">
+                <div class="bg-[#FFFFFF] p-2 rounded-[14px] text-[#000000] flex justify-center items-center flex-1 cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#F3F4F6] hover:scale-[1.02] active:scale-[0.98]"
+                    onclick="window.location.href='index.html'">
 
-                    <h1>Document Signing</h1>
+                    <h1 class="transition-colors duration-300">Document Signing</h1>
 
                 </div>
 
-                <div class="bg-[#155DFC] p-2 rounded-[14px] text-[#FFFFFF] flex justify-center items-center">
+                <div class="bg-[#155DFC] p-2 rounded-[14px] text-[#FFFFFF] flex justify-center items-center transition-all duration-300 ease-in-out transform">
 
-                    <h1>Stamp Designer</h1>
+                    <h1 class="transition-colors duration-300">Stamp Designer</h1>
 
                 </div>
 
@@ -100,7 +100,7 @@
             <!-- Left side (canva) -->
             <!-- Canvas Section -->
             <div
-                class="relative flex flex-col justify-center items-center bg-[#FFFFFF] rounded-[24px] shadow-inner w-full p-10">
+                class="relative flex flex-col justify-center items-center bg-[#FFFFFF] rounded-[24px] shadow-inner w-full px-2 md:px-10 py-10">
                 <div class="border-[1.5px] border-[#D1D5DC] w-full h-full rounded-[16px] p-3 ">
                     <div class="text-center mb-4">
                         <h3 class="text-[16px] text-[#101828]">Stamp Preview</h3>
@@ -108,7 +108,7 @@
                     </div>
                     <div class="flex justify-center">
                         <canvas id="stampCanvas" width="400" height="400"
-                            class="border-[1.5px] border-[#E5E7EB] rounded-[14px] bg-[#FFFFFF] shadow-lg"></canvas>
+                            class="border-[1.5px] border-[#E5E7EB] rounded-[14px] bg-[#FFFFFF] shadow-lg max-w-full w-full sm:w-auto"></canvas>
                     </div>
                     <div class="mt-4 text-center text-[12px]">
                         <p class="text-[#6A7282]">Size: <span id="sizeDisplay">40mm x 40mm</span></p>
@@ -121,7 +121,7 @@
 
             <!-- Right Side (Tools) -->
             <div
-                class="xl:max-w-[319px] max-h-[597px] w-full bg-[#FFFFFF] rounded-[24px] p-5 overflow-y-auto mt-10 xl:mt-0">
+                class="xl:max-w-[319px] max-h-[597px] w-full bg-[#FFFFFF] rounded-[24px] p-5 overflow-y-auto">
                 <!-- Drawing mood -->
                 <div class="flex flex-row items-center gap-3">
                     <div class="size-[32px] bg-[#DBEAFE] rounded-[10px] flex justify-center items-center">
@@ -210,7 +210,7 @@
                     </div>
 
                     <input type="color" id="stampColor" value="#DC2626"
-                        class="lg:w-[255px] h-[80px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer">
+                        class="w-full xl:w-[255px] h-[80px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer">
                     </input>
 
                     <div class="flex flex-row gap-2">
@@ -302,7 +302,7 @@
                     <div class="mt-5">
                         <label class="text-[14px] text-[#4A5565]">Text Color</label>
                         <input type="color" id="textColor" value="#000000"
-                            class="lg:w-[255px] h-[80px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer mt-3">
+                            class="w-full xl:w-[255px] h-[80px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer mt-3">
                         </input>
                     </div>
 
