@@ -20,7 +20,7 @@ var currentMode = 'pen'; // 'pen' or 'eraser'
 let lastX = 0;
 let lastY = 0;
 let lastTime = 0;
-let baseWidth = 5;
+let baseWidth = 2;
 let backgroundImage = null; // Store the imported document
 let isDocumentLoaded = false;
 let pdfDocument = null; // Store the PDF document for multi-page navigation
@@ -124,7 +124,7 @@ async function handleFileImport(file) {
         undoStack = [];
         
         // Update line width - since we draw at full res, scale the line width
-        const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) * zoomLevel;
+        const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) / zoomLevel;
         ctx.lineWidth = baseWidth * displayScale;
         
         // Show zoom controls when document is loaded
@@ -356,7 +356,7 @@ document.getElementById('colorPicker').addEventListener('input', function() {
 // Thickness selector
 document.getElementById('thickness').addEventListener('input', function() {
     baseWidth = parseInt(this.value);
-    const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) * zoomLevel;
+    const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) / zoomLevel;
     ctx.lineWidth = baseWidth * displayScale;
     document.getElementById('thicknessValue').querySelector('h3').textContent = baseWidth + 'PX';
 });
@@ -512,7 +512,7 @@ function draw(e) {
     let currentTime = Date.now();
     let distance = Math.sqrt((x - lastX) ** 2 + (y - lastY) ** 2);
     let timeDiff = currentTime - lastTime;
-    const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) * zoomLevel;
+    const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) / zoomLevel;
     if (timeDiff > 0) {
         let speed = distance / timeDiff;
         let maxSpeed = 3; // Reduced for more variation
@@ -1059,7 +1059,7 @@ function adjustCanvasDisplay() {
         canvas.style.height = displayHeight + 'px';
         
         // Update line width
-        const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) * zoomLevel;
+        const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) / zoomLevel;
         ctx.lineWidth = baseWidth * displayScale;
     }
 }
