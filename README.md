@@ -1,5 +1,5 @@
-# SignMe - Digital Signature & Stamp Designer Suite
-
+(# SignMe - Digital Signature & Stamp Designer Suite
+)
 **Version 1.1**
 
 A comprehensive web-based suite for digital signature capture and custom stamp design. Create professional signatures with HTML5 Canvas and design custom stamps with various shapes, text, and styling options. Perfect for businesses, legal documents, and creative projects.
@@ -176,7 +176,7 @@ For support, please use the CodeCanyon comment section or contact the author thr
 
 ## Credits
 
-**Developed by Jaan Network © 2025**
+**Developed by JAAN Network (PVT) Ltd © 2025**
 
 Built with:
 - HTML5 Canvas API
