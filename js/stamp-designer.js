@@ -198,6 +198,14 @@ class StampDesigner {
             }
         });
 
+        // Invert text toggle
+        document.getElementById('invertTextToggle').addEventListener('change', (e) => {
+            if (this.selectedElement && this.selectedElement.text) {
+                this.selectedElement.inverted = e.target.checked;
+                this.drawStamp();
+            }
+        });
+
         // Letter spacing slider
         document.getElementById('letterSpacingSlider').addEventListener('input', (e) => {
             if (this.selectedElement && this.selectedElement.text) {
@@ -423,12 +431,16 @@ class StampDesigner {
             document.getElementById('rotationControl').style.display = 'block';
             this.updateOutlineControls();
             
+            // Update invert text checkbox
+            document.getElementById('invertTextToggle').checked = this.selectedElement.inverted || false;
+            
             // Enable text controls
             document.getElementById('curveSlider').disabled = false;
             document.getElementById('letterSpacingSlider').disabled = false;
             document.getElementById('textRotation').disabled = false;
             document.getElementById('textColor').disabled = false;
             document.getElementById('fontSize').disabled = false;
+            document.getElementById('invertTextToggle').disabled = false;
             
             // Disable shape controls
             document.getElementById('widthSlider').disabled = true;
@@ -457,6 +469,7 @@ class StampDesigner {
             document.getElementById('textRotation').disabled = true;
             document.getElementById('textColor').disabled = true;
             document.getElementById('fontSize').disabled = true;
+            document.getElementById('invertTextToggle').disabled = true;
         }
         this.updateSizeDisplay();
     }
@@ -751,6 +764,17 @@ class StampDesigner {
         const text = textElement.text;
         const color = textElement.color || '#000000';
 
+        // Save context state
+        this.ctx.save();
+        
+        // Apply inversion if enabled
+        if (textElement.inverted) {
+            this.ctx.translate(x, y);
+            this.ctx.rotate(Math.PI); // 180 degrees
+            x = 0;
+            y = 0;
+        }
+
         // Draw shadow first (if enabled)
         if (textElement.shadow) {
             this.ctx.save();
@@ -771,6 +795,9 @@ class StampDesigner {
         // Draw main text
         this.ctx.fillStyle = color;
         this.ctx.fillText(text, x, y);
+        
+        // Restore context state
+        this.ctx.restore();
     }
 
     drawCurvedTextWithEffects(textElement, centerX, centerY) {
@@ -786,6 +813,7 @@ class StampDesigner {
         const baseAngleStep = totalAngle / text.length;
         const angleStep = baseAngleStep + ((textElement.letterSpacing || 0) * Math.PI / 180);
         const startAngle = textElement.curve > 0 ? Math.PI : 0;
+        const invertRotation = textElement.inverted ? Math.PI : 0;
 
         // Draw shadow for curved text (if enabled)
         if (textElement.shadow) {
@@ -798,7 +826,7 @@ class StampDesigner {
 
                 this.ctx.save();
                 this.ctx.translate(x, y);
-                this.ctx.rotate(angle + Math.PI / 2);
+                this.ctx.rotate(angle + Math.PI / 2 + invertRotation);
                 this.ctx.fillText(text[i], 0, 0);
                 this.ctx.restore();
             }
@@ -817,7 +845,7 @@ class StampDesigner {
 
                 this.ctx.save();
                 this.ctx.translate(x, y);
-                this.ctx.rotate(angle + Math.PI / 2);
+                this.ctx.rotate(angle + Math.PI / 2 + invertRotation);
                 this.ctx.strokeText(text[i], 0, 0);
                 this.ctx.restore();
             }
@@ -833,7 +861,7 @@ class StampDesigner {
 
             this.ctx.save();
             this.ctx.translate(x, y);
-            this.ctx.rotate(angle + Math.PI / 2);
+            this.ctx.rotate(angle + Math.PI / 2 + invertRotation);
             this.ctx.fillText(text[i], 0, 0);
             this.ctx.restore();
         }
@@ -878,7 +906,8 @@ class StampDesigner {
                 x: x,
                 y: y,
                 curve: 0, // Curve level (-100 to 100)
-                letterSpacing: 0 // Letter spacing (-50 to 50)
+                letterSpacing: 0, // Letter spacing (-50 to 50)
+                inverted: false // Invert text (flip upside down)
             };
 
             this.textElements.push(textElement);
@@ -1288,6 +1317,17 @@ class StampDesigner {
         const text = textElement.text;
         const color = textElement.color || '#000000';
 
+        // Save context state
+        ctx.save();
+        
+        // Apply inversion if enabled
+        if (textElement.inverted) {
+            ctx.translate(x, y);
+            ctx.rotate(Math.PI); // 180 degrees
+            x = 0;
+            y = 0;
+        }
+
         // Draw shadow first (if enabled)
         if (textElement.shadow) {
             ctx.save();
@@ -1308,6 +1348,9 @@ class StampDesigner {
         // Draw main text
         ctx.fillStyle = color;
         ctx.fillText(text, x, y);
+        
+        // Restore context state
+        ctx.restore();
     }
 
     drawCurvedTextWithEffectsToContext(ctx, textElement, centerX, centerY) {
@@ -1323,6 +1366,7 @@ class StampDesigner {
         const baseAngleStep = totalAngle / text.length;
         const angleStep = baseAngleStep + ((textElement.letterSpacing || 0) * Math.PI / 180);
         const startAngle = textElement.curve > 0 ? Math.PI : 0;
+        const invertRotation = textElement.inverted ? Math.PI : 0;
 
         // Draw shadow for curved text (if enabled)
         if (textElement.shadow) {
@@ -1335,7 +1379,7 @@ class StampDesigner {
 
                 ctx.save();
                 ctx.translate(x, y);
-                ctx.rotate(angle + Math.PI / 2);
+                ctx.rotate(angle + Math.PI / 2 + invertRotation);
                 ctx.fillText(text[i], 0, 0);
                 ctx.restore();
             }
@@ -1354,7 +1398,7 @@ class StampDesigner {
 
                 ctx.save();
                 ctx.translate(x, y);
-                ctx.rotate(angle + Math.PI / 2);
+                ctx.rotate(angle + Math.PI / 2 + invertRotation);
                 ctx.strokeText(text[i], 0, 0);
                 ctx.restore();
             }
@@ -1370,7 +1414,7 @@ class StampDesigner {
 
             ctx.save();
             ctx.translate(x, y);
-            ctx.rotate(angle + Math.PI / 2);
+            ctx.rotate(angle + Math.PI / 2 + invertRotation);
             ctx.fillText(text[i], 0, 0);
             ctx.restore();
         }
