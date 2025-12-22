@@ -1244,3 +1244,43 @@ document.getElementById('colorOrange').addEventListener('click', function() {
 
 // Initialize zoom display
 updateZoom();
+
+// Show drawing instructions placeholder on canvas load
+function showDrawingInstructions() {
+    // Only show on desktop screens (1024px and above)
+    if (window.innerWidth < 1024) {
+        return;
+    }
+    
+    if (ctx && canvas) {
+        // Save current canvas state
+        const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        
+        // Clear canvas and draw placeholder text
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Set text properties
+        ctx.fillStyle = '#6B7280';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Draw main instruction
+        ctx.fillText('Hold Shift + Drag to Draw', canvas.width / 2, canvas.height / 2 - 20);
+        
+        // Draw secondary instruction
+        ctx.font = '16px Arial';
+        ctx.fillText('Your signatures here', canvas.width / 2, canvas.height / 2 + 20);
+        
+        // Restore canvas after 3 seconds
+        setTimeout(() => {
+            ctx.putImageData(currentImageData, 0, 0);
+        }, 3000);
+    }
+}
+
+// Show instructions on page load
+window.addEventListener('load', function() {
+    // Small delay to ensure canvas is fully rendered
+    setTimeout(showDrawingInstructions, 500);
+});

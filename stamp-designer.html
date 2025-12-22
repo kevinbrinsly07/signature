@@ -408,6 +408,104 @@
         </div>
         </div>
 
+        <!-- Usage Instructions -->
+        <div class="w-full bg-[#FFFFFF] rounded-[14px] border-[1.5px] border-[#BEDBFF] p-6 mt-10 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-[32px] bg-[#EFF6FF] rounded-[10px] flex justify-center items-center">
+                    <i class="fas fa-info-circle text-[#155DFC]"></i>
+                </div>
+                <h2 class="text-[18px] font-semibold text-[#155DFC]">How to Use Stamp Designer</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6 text-[14px] text-[#374151]">
+                <div>
+                    <h3 class="font-semibold mb-2 text-[#155DFC]">Getting Started</h3>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Choose your stamp shape: Circle, Rectangle, Oval, or Triangle</li>
+                        <li>Set the size using the width and height sliders (20-350mm)</li>
+                        <li>Customize colors, patterns, and border styles</li>
+                    </ol>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2 text-[#155DFC]">Shape & Size</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Shape Selection:</strong> Click on Circle, Rectangle, Oval, or Triangle buttons</li>
+                        <li><strong>Size Controls:</strong> Adjust width/diameter and height with sliders</li>
+                        <li><strong>Real-time Preview:</strong> See changes instantly in the canvas</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2 text-[#155DFC]">Colors & Patterns</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Fill Color:</strong> Choose any color with the color picker</li>
+                        <li><strong>Filled Shape:</strong> Toggle to fill or outline only</li>
+                        <li><strong>Patterns:</strong> Select from Solid, Stripes, Dots, or Grid</li>
+                        <li><strong>Pattern Size:</strong> Adjust pattern density (5-50px)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2 text-[#155DFC]">Borders</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Border Thickness:</strong> Set thickness from 1-20px</li>
+                        <li><strong>Border Patterns:</strong> Choose Solid, Dashed, or Dotted styles</li>
+                        <li><strong>Border Color:</strong> Automatically matches fill color</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2 text-[#155DFC]">Text Features</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Add Text:</strong> Enter text and click "Add Text" button</li>
+                        <li><strong>Font Selection:</strong> Choose from Arial, Times New Roman, Courier New, Georgia</li>
+                        <li><strong>Font Size:</strong> Adjust from 8-72px</li>
+                        <li><strong>Text Color:</strong> Select any color for your text</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2 text-[#155DFC]">Text Styling</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Formatting:</strong> Apply Bold, Italic, Outline, or Shadow effects</li>
+                        <li><strong>Curve Text:</strong> Bend text along a curve (-100 to +100)</li>
+                        <li><strong>Letter Spacing:</strong> Adjust spacing between characters</li>
+                        <li><strong>Rotation:</strong> Rotate text to any angle</li>
+                    </ul>
+                </div>
+                <div class="md:col-span-2">
+                    <h3 class="font-semibold mb-2 text-[#155DFC]">Layers & Export</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Layers Panel:</strong> View and manage all stamp elements</li>
+                        <li><strong>Drag Elements:</strong> Click and drag to reposition text and shapes</li>
+                        <li><strong>Transparent Background:</strong> Toggle for PNG export with transparency</li>
+                        <li><strong>Clear Design:</strong> Remove all elements to start over</li>
+                        <li><strong>Export:</strong> Download your stamp as PNG or other formats</li>
+                    </ul>
+                </div>
+                <div class="md:col-span-2">
+                    <h3 class="font-semibold mb-2 text-[#155DFC]">Keyboard Shortcuts</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-medium mb-1 text-[#155DFC]">Element Management</h4>
+                            <ul class="list-disc list-inside space-y-1 text-[13px]">
+                                <li><strong>Delete</strong> or <strong>Backspace:</strong> Remove selected element</li>
+                                <li><strong>Ctrl+C</strong> (Windows) / <strong>Cmd+C</strong> (Mac): Copy selected element</li>
+                                <li><strong>Ctrl+V</strong> (Windows) / <strong>Cmd+V</strong> (Mac): Paste copied element</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-1 text-[#155DFC]">Text Input</h4>
+                            <ul class="list-disc list-inside space-y-1 text-[13px]">
+                                <li><strong>Enter:</strong> Add text to stamp design</li>
+                                <li><strong>Escape:</strong> Close modals or cancel actions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 p-3 bg-[#F0F9FF] rounded-[8px] border-l-4 border-[#155DFC]">
+                <p class="text-[13px] text-[#155DFC]">
+                    <strong>Tip:</strong> Start with a basic shape and color, then add text elements. Use the layer system to organize complex designs. For best results, test different sizes before final export.
+                </p>
+            </div>
+        </div>
+
         <!-- Enhancement Modal -->
         <div id="enhancementModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
             <div class="bg-white p-4 sm:p-6 rounded-lg max-w-3xl w-full max-h-[90vh] flex flex-col my-auto">
