@@ -3,13 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SignMe Stamp Designer - Create custom stamps with various shapes, text, and enhancement effects. Professional stamp design tool.">
-    <meta name="keywords" content="stamp designer, custom stamps, signature stamps, HTML5 canvas, stamp creation, digital stamps">
+    <meta name="description"
+        content="SignMe Stamp Designer - Create custom stamps with various shapes, text, and enhancement effects. Professional stamp design tool.">
+    <meta name="keywords"
+        content="stamp designer, custom stamps, signature stamps, HTML5 canvas, stamp creation, digital stamps">
     <meta name="author" content="JAAN Network (PVT) Ltd">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
     <title>SignMe - Stamp Designer</title>
 </head>
 
@@ -19,9 +26,8 @@
         <div
             class="shadow-2xl border-[1px] border-[#E5E7EB] w-full flex flex-col md:flex-row gap-5 justify-between items-center p-5 rounded-[10px] bg-[#FFFFFF]">
             <!-- left -->
-            <div
-                class="flex flex-col items-center justify-center text-center sm:text-start sm:flex-row font-[400]">
-                <img src="./assets/logo.png" class="w-[80px]" />
+            <div class="flex flex-col items-center justify-center text-center sm:text-start sm:flex-row font-[400] gap-1">
+                <img src="./assets/logo.png" class="w-[50px]" />
                 <div>
                     <h1 class="text-[16px]">SignMe</h1>
                     <h3 class="text-[14px] text-[#6A7282]">Digital Signature & Stamp Designer Suite</h3>
@@ -37,7 +43,8 @@
 
                 </div>
 
-                <div class="bg-[#155DFC] p-2 rounded-[14px] text-[#FFFFFF] flex justify-center items-center transition-all duration-300 ease-in-out transform">
+                <div
+                    class="bg-[#155DFC] p-2 rounded-[14px] text-[#FFFFFF] flex justify-center items-center transition-all duration-300 ease-in-out transform">
 
                     <h1 class="transition-colors duration-300">Stamp Designer</h1>
 
@@ -122,8 +129,7 @@
 
 
             <!-- Right Side (Tools) -->
-            <div
-                class="xl:max-w-[319px] max-h-[597px] w-full bg-[#FFFFFF] rounded-[24px] p-5 overflow-y-auto">
+            <div class="xl:max-w-[319px] max-h-[597px] w-full bg-[#FFFFFF] rounded-[24px] p-5 overflow-y-auto">
                 <!-- Drawing mood -->
                 <div class="flex flex-row items-center gap-3">
                     <div class="size-[32px] bg-[#DBEAFE] rounded-[10px] flex justify-center items-center">
@@ -135,19 +141,25 @@
 
                 <div class="mt-5 flex flex-col gap-2">
                     <div class="flex flex-row gap-2">
-                        <button class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#155DFC] bg-[#EFF6FF] flex flex-col gap-2 justify-center items-center cursor-pointer" data-shape="circle">
+                        <button
+                            class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#155DFC] bg-[#EFF6FF] flex flex-col gap-2 justify-center items-center cursor-pointer"
+                            data-shape="circle">
                             <img src="./assets/stamp/circle-icon.svg" alt="circle" />
                             <h3 class="text-[12px] text-[#155DFC]">Circle</h3>
                         </button>
 
-                        <button class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer" data-shape="rectangle">
+                        <button
+                            class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer"
+                            data-shape="rectangle">
                             <img src="./assets/stamp/rectangle-icon.svg" alt="rectangle" />
                             <h3 class="text-[12px] text-[#4A5565]">Rectangle</h3>
                         </button>
                     </div>
 
                     <div class="flex flex-row gap-2">
-                        <button class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer" data-shape="triangle">
+                        <button
+                            class="shape-btn w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer"
+                            data-shape="triangle">
                             <img src="./assets/stamp/triangle-icon.svg" alt="triangle" />
                             <h3 class="text-[12px] text-[#4A5565]">Triangle</h3>
                         </button>
@@ -257,7 +269,8 @@
 
                     <div class="mt-2" id="borderPatternSection">
                         <label class="text-[14px] text-[#4A5565]">Border Pattern</label>
-                        <select id="borderPattern" class="w-full h-[40px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer">
+                        <select id="borderPattern"
+                            class="w-full h-[40px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer">
                             <option value="solid">Solid</option>
                             <option value="dashed">Dashed</option>
                             <option value="dotted">Dotted</option>
@@ -334,20 +347,26 @@
                                     <h3>0px</h3>
                                 </div>
                             </div>
-                            <input type="range" id="letterSpacingSlider" min="-50" max="50" value="0" class="w-full mt-2">
+                            <input type="range" id="letterSpacingSlider" min="-50" max="50" value="0"
+                                class="w-full mt-2">
                         </div>
                     </div>
 
                     <div class="flex flex-row gap-2 justify-between items-center text-[14px] mt-5">
-                        <button id="boldBtn" class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Bold</button>
-                        <button id="italicBtn" class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Italic</button>
-                        <button id="textOutlineBtn" class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Outline</button>
-                        <button id="textShadowBtn" class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Shadow</button>
+                        <button id="boldBtn"
+                            class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Bold</button>
+                        <button id="italicBtn"
+                            class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Italic</button>
+                        <button id="textOutlineBtn"
+                            class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Outline</button>
+                        <button id="textShadowBtn"
+                            class="bg-[#FFFFFF] text-[10px] rounded-[10px] p-1 w-[41px] h-[18px] flex justify-center items-center">Shadow</button>
                     </div>
 
                     <div id="outlineColorSection" class="mt-2 hidden">
                         <label class="text-[14px] text-[#4A5565]">Outline Color</label>
-                        <input type="color" id="outlineColor" value="#000000" class="w-full h-[40px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer mt-2">
+                        <input type="color" id="outlineColor" value="#000000"
+                            class="w-full h-[40px] border-[1.5px] border-[#E5E7EB] bg-[#FFFFFF] rounded-[14px] p-2 cursor-pointer mt-2">
                     </div>
 
                     <div class="flex flex-row gap-2 mt-5">
@@ -407,9 +426,9 @@
 
                         <div class="mt-5 flex flex-col gap-2">
                         </div>
+                    </div>
                 </div>
             </div>
-        </div>
         </div>
 
         <!-- Usage Instructions -->
@@ -458,7 +477,8 @@
                     <h3 class="font-semibold mb-2 text-[#155DFC]">Text Features</h3>
                     <ul class="list-disc list-inside space-y-1">
                         <li><strong>Add Text:</strong> Enter text and click "Add Text" button</li>
-                        <li><strong>Font Selection:</strong> Choose from Arial, Times New Roman, Courier New, Georgia</li>
+                        <li><strong>Font Selection:</strong> Choose from Arial, Times New Roman, Courier New, Georgia
+                        </li>
                         <li><strong>Font Size:</strong> Adjust from 8-72px</li>
                         <li><strong>Text Color:</strong> Select any color for your text</li>
                     </ul>
@@ -489,8 +509,10 @@
                             <h4 class="font-medium mb-1 text-[#155DFC]">Element Management</h4>
                             <ul class="list-disc list-inside space-y-1 text-[13px]">
                                 <li><strong>Delete</strong> or <strong>Backspace:</strong> Remove selected element</li>
-                                <li><strong>Ctrl+C</strong> (Windows) / <strong>Cmd+C</strong> (Mac): Copy selected element</li>
-                                <li><strong>Ctrl+V</strong> (Windows) / <strong>Cmd+V</strong> (Mac): Paste copied element</li>
+                                <li><strong>Ctrl+C</strong> (Windows) / <strong>Cmd+C</strong> (Mac): Copy selected
+                                    element</li>
+                                <li><strong>Ctrl+V</strong> (Windows) / <strong>Cmd+V</strong> (Mac): Paste copied
+                                    element</li>
                             </ul>
                         </div>
                         <div>
@@ -505,26 +527,32 @@
             </div>
             <div class="mt-4 p-3 bg-[#F0F9FF] rounded-[8px] border-l-4 border-[#155DFC]">
                 <p class="text-[13px] text-[#155DFC]">
-                    <strong>Tip:</strong> Start with a basic shape and color, then add text elements. Use the layer system to organize complex designs. For best results, test different sizes before final export.
+                    <strong>Tip:</strong> Start with a basic shape and color, then add text elements. Use the layer
+                    system to organize complex designs. For best results, test different sizes before final export.
                 </p>
             </div>
         </div>
 
         <!-- Enhancement Modal -->
-        <div id="enhancementModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div id="enhancementModal"
+            class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
             <div class="bg-white p-4 sm:p-6 rounded-lg max-w-3xl w-full max-h-[90vh] flex flex-col my-auto">
                 <h3 class="text-base sm:text-lg font-semibold mb-4">Choose Enhancement</h3>
-                <div id="enhancementGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 overflow-y-auto">
+                <div id="enhancementGrid"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 overflow-y-auto">
                     <!-- Options will be added here -->
                 </div>
                 <div class="flex justify-end gap-2 mt-auto">
-                    <button id="cancelExport" class="px-3 sm:px-4 py-2 bg-gray-200 rounded text-sm sm:text-base">Cancel</button>
-                    <button id="confirmExport" class="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded text-sm sm:text-base" disabled>Export</button>
+                    <button id="cancelExport"
+                        class="px-3 sm:px-4 py-2 bg-gray-200 rounded text-sm sm:text-base">Cancel</button>
+                    <button id="confirmExport"
+                        class="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded text-sm sm:text-base"
+                        disabled>Export</button>
                 </div>
             </div>
         </div>
 
         <script src="js/stamp-designer.js"></script>
-    </body>
+</body>
 
 </html>

@@ -3,13 +3,20 @@
 <head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <meta name="description" content="SignMe - Professional digital signature capture and custom stamp design suite. Create signatures and stamps with HTML5 Canvas technology.">
-     <meta name="keywords" content="digital signature, stamp designer, canvas drawing, signature capture, custom stamps, HTML5, JavaScript">
+     <meta name="description"
+          content="SignMe - Professional digital signature capture and custom stamp design suite. Create signatures and stamps with HTML5 Canvas technology.">
+     <meta name="keywords"
+          content="digital signature, stamp designer, canvas drawing, signature capture, custom stamps, HTML5, JavaScript">
      <meta name="author" content="JAAN Network (PVT) Ltd">
      <script src="https://cdn.tailwindcss.com"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+     <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+     <link rel="manifest" href="favicon/site.webmanifest">
      <title>SignMe - Digital Signature & Stamp Designer</title>
 </head>
 
@@ -19,9 +26,8 @@
           <div
                class="shadow-2xl border-[1px] border-[#E5E7EB] w-full flex flex-col md:flex-row gap-5 justify-between items-center p-5 rounded-[10px] bg-[#FFFFFF]">
                <!-- left -->
-               <div
-                    class="flex flex-col items-center text-center sm:text-start justify-center sm:flex-row font-[400]">
-                    <img src="./assets/logo.png" class="h-[80px]" />
+               <div class="flex flex-col items-center text-center sm:text-start justify-center sm:flex-row font-[400] gap-1">
+                    <img src="./assets/logo.png" class="h-[50px]" />
                     <div>
                          <h1 class="text-[16px]">SignMe</h1>
                          <h3 class="text-[14px] text-[#6A7282]">Digital Signature & Stamp Designer Suite</h3>
@@ -30,13 +36,15 @@
                <!-- middle -->
                <div
                     class="flex flex-col sm:flex-row md:min-w-[270px] border-[1px] border-[#E5E7EB] shadow-2xl text-[12px] rounded-[20px] p-2">
-                    <div class="bg-[#155DFC] p-2 rounded-[14px] text-[#FFFFFF] flex justify-center items-center flex-1 transition-all duration-300 ease-in-out transform">
+                    <div
+                         class="bg-[#155DFC] p-2 rounded-[14px] text-[#FFFFFF] flex justify-center items-center flex-1 transition-all duration-300 ease-in-out transform">
 
                          <h1 class="transition-colors duration-300">Document Signing</h1>
 
                     </div>
 
-                    <div class="bg-[#FFFFFF] p-2 rounded-[14px] text-[#000000] flex justify-center items-center cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#F3F4F6] hover:scale-[1.02] active:scale-[0.98]" onclick="window.location.href='stamp-designer.html'">
+                    <div class="bg-[#FFFFFF] p-2 rounded-[14px] text-[#000000] flex justify-center items-center cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#F3F4F6] hover:scale-[1.02] active:scale-[0.98]"
+                         onclick="window.location.href='stamp-designer.html'">
 
                          <h1 class="transition-colors duration-300">Stamp Designer</h1>
 
@@ -105,9 +113,12 @@
                          <!-- Page Indicator -->
                          <div id="pageIndicator" class="text-center text-sm text-gray-600 mb-2">
                          </div>
-                         <div id="canvasContainer" class="border-[1px] border-[#D1D5DC] rounded-[16px] overflow-hidden relative w-full" style="max-height: 600px; max-width: 800px;">
+                         <div id="canvasContainer"
+                              class="border-[1px] border-[#D1D5DC] rounded-[16px] overflow-hidden relative w-full"
+                              style="max-height: 600px; max-width: 800px;">
                               <canvas id="signatureCanvas" width="800" height="450"
-                                   class="bg-white shadow-lg cursor-crosshair mx-auto block" style="max-width: 100%; height: auto;">
+                                   class="bg-white shadow-lg cursor-crosshair mx-auto block"
+                                   style="max-width: 100%; height: auto;">
                               </canvas>
                          </div>
                          <!-- Page Navigation -->
@@ -122,39 +133,49 @@
                     </div>
 
                     <!-- Zoom Controls -->
-                    <div id="zoomControls" class="hidden w-full bg-[#FFFFFF] shadow-2xl rounded-[24px] flex flex-wrap gap-2 justify-center items-center py-3 px-3 text-[12px] sm:text-[14px] mt-5">
-                         <button id="zoomOutBtn" class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-3 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
+                    <div id="zoomControls"
+                         class="hidden w-full bg-[#FFFFFF] shadow-2xl rounded-[24px] flex flex-wrap gap-2 justify-center items-center py-3 px-3 text-[12px] sm:text-[14px] mt-5">
+                         <button id="zoomOutBtn"
+                              class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-3 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
                               <i class="fas fa-search-minus text-[#0A0A0A]"></i>
                          </button>
                          <div class="flex-1 text-center min-w-[60px]">
                               <span id="zoomLevel" class="text-[#0A0A0A] font-medium">100%</span>
                          </div>
-                         <button id="zoomInBtn" class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-3 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
+                         <button id="zoomInBtn"
+                              class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-3 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
                               <i class="fas fa-search-plus text-[#0A0A0A]"></i>
                          </button>
-                         <button id="zoomResetBtn" class="bg-[#155DFC] text-white rounded-[8px] px-3 py-2 cursor-pointer hover:bg-[#0D4ACF] transition-all">
+                         <button id="zoomResetBtn"
+                              class="bg-[#155DFC] text-white rounded-[8px] px-3 py-2 cursor-pointer hover:bg-[#0D4ACF] transition-all">
                               <i class="fas fa-compress-arrows-alt"></i>
                          </button>
                     </div>
 
                     <!-- Pan Controls (shown when zoomed) -->
-                    <div id="panControls" class="hidden w-full bg-[#FFFFFF] shadow-2xl rounded-[24px] py-3 px-3 text-[12px] sm:text-[14px] mt-5">
+                    <div id="panControls"
+                         class="hidden w-full bg-[#FFFFFF] shadow-2xl rounded-[24px] py-3 px-3 text-[12px] sm:text-[14px] mt-5">
                          <div class="flex flex-col items-center gap-2">
-                              <button id="panUpBtn" class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
+                              <button id="panUpBtn"
+                                   class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
                                    <i class="fas fa-arrow-up text-[#0A0A0A]"></i>
                               </button>
                               <div class="flex gap-2">
-                                   <button id="panLeftBtn" class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
+                                   <button id="panLeftBtn"
+                                        class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
                                         <i class="fas fa-arrow-left text-[#0A0A0A]"></i>
                                    </button>
-                                   <button id="panCenterBtn" class="bg-[#155DFC] text-white rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#0D4ACF] transition-all">
+                                   <button id="panCenterBtn"
+                                        class="bg-[#155DFC] text-white rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#0D4ACF] transition-all">
                                         <i class="fas fa-compress"></i>
                                    </button>
-                                   <button id="panRightBtn" class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
+                                   <button id="panRightBtn"
+                                        class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
                                         <i class="fas fa-arrow-right text-[#0A0A0A]"></i>
                                    </button>
                               </div>
-                              <button id="panDownBtn" class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
+                              <button id="panDownBtn"
+                                   class="bg-[#FFFFFF] border-[1.5px] border-[#D1D5DC] rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] transition-all">
                                    <i class="fas fa-arrow-down text-[#0A0A0A]"></i>
                               </button>
                          </div>
@@ -236,7 +257,8 @@
 
                          <div id="eraserMode"
                               class="w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 active:scale-95">
-                              <img src="./assets/eraser-icon.svg" alt="eraser" class="transition-transform duration-300" />
+                              <img src="./assets/eraser-icon.svg" alt="eraser"
+                                   class="transition-transform duration-300" />
                               <h3 class="text-[12px] text-[#4A5565] transition-colors duration-300">Eraser</h3>
                          </div>
                     </div>
@@ -257,13 +279,15 @@
                          <div class="flex flex-row gap-3">
                               <div id="thinThickness"
                                    class="w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 active:scale-95">
-                                   <img src="./assets/thin-icon.svg" alt="eraser" class="transition-transform duration-300" />
+                                   <img src="./assets/thin-icon.svg" alt="eraser"
+                                        class="transition-transform duration-300" />
                                    <h3 class="text-[12px] text-[#4A5565] transition-colors duration-300">Thin</h3>
                               </div>
 
                               <div id="mediumThickness"
                                    class="w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 active:scale-95">
-                                   <img src="./assets/medium-icon.svg" alt="eraser" class="transition-transform duration-300" />
+                                   <img src="./assets/medium-icon.svg" alt="eraser"
+                                        class="transition-transform duration-300" />
                                    <h3 class="text-[12px] text-[#4A5565] transition-colors duration-300">Medium</h3>
                               </div>
                          </div>
@@ -271,13 +295,15 @@
                          <div class="flex flex-row gap-3">
                               <div id="thickThickness"
                                    class="w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 active:scale-95">
-                                   <img src="./assets/thick-icon.svg" alt="eraser" class="transition-transform duration-300" />
+                                   <img src="./assets/thick-icon.svg" alt="eraser"
+                                        class="transition-transform duration-300" />
                                    <h3 class="text-[12px] text-[#4A5565] transition-colors duration-300">Thick</h3>
                               </div>
 
                               <div id="boldThickness"
                                    class="w-[123px] h-[80px] rounded-[14px] border-[1.5px] border-[#E5E7EB] bg-[#F9FAFB] flex flex-col gap-2 justify-center items-center cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 active:scale-95">
-                                   <img src="./assets/bold-icon.svg" alt="bold" class="transition-transform duration-300" />
+                                   <img src="./assets/bold-icon.svg" alt="bold"
+                                        class="transition-transform duration-300" />
                                    <h3 class="text-[12px] text-[#4A5565] transition-colors duration-300">Bold</h3>
                               </div>
                          </div>
@@ -310,20 +336,26 @@
 
                     <div class="mt-5 flex flex-col gap-4">
                          <div class="flex flex-row gap-4">
-                              <div id="colorBlack" class="w-[75px] h-[76px] bg-[#000000] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
+                              <div id="colorBlack"
+                                   class="w-[75px] h-[76px] bg-[#000000] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
                               </div>
-                              <div id="colorBlue" class="w-[75px] h-[76px] bg-[#2563EB] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
+                              <div id="colorBlue"
+                                   class="w-[75px] h-[76px] bg-[#2563EB] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
                               </div>
-                              <div id="colorRed" class="w-[75px] h-[76px] bg-[#DC2626] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
+                              <div id="colorRed"
+                                   class="w-[75px] h-[76px] bg-[#DC2626] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
                               </div>
                          </div>
                          <div class="flex flex-row gap-4">
-                              <div id="colorGreen" class="w-[75px] h-[76px] bg-[#059669] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
+                              <div id="colorGreen"
+                                   class="w-[75px] h-[76px] bg-[#059669] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
                               </div>
                               <div id="colorPurple"
-                                   class="w-[75px] h-[76px] bg-[#7C3AED] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent"></div>
+                                   class="w-[75px] h-[76px] bg-[#7C3AED] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
+                              </div>
                               <div id="colorOrange"
-                                   class="w-[75px] h-[76px] bg-[#EA580C] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent"></div>
+                                   class="w-[75px] h-[76px] bg-[#EA580C] rounded-[14px] cursor-pointer transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[3px] border-transparent">
+                              </div>
                          </div>
                     </div>
 
@@ -370,7 +402,8 @@
                          <h3 class="font-semibold mb-2 text-[#155DFC]">Getting Started</h3>
                          <ol class="list-decimal list-inside space-y-1">
                               <li>Click the <strong>Import</strong> button to upload a PDF or image document</li>
-                              <li>Use the navigation buttons to move between pages if your document has multiple pages</li>
+                              <li>Use the navigation buttons to move between pages if your document has multiple pages
+                              </li>
                               <li>Select your preferred pen tool and adjust thickness/color as needed</li>
                          </ol>
                     </div>
@@ -417,20 +450,23 @@
                                    <h4 class="font-medium mb-1 text-[#155DFC]">Drawing</h4>
                                    <ul class="list-disc list-inside space-y-1 text-[13px]">
                                         <li><strong>Hold Shift + Mouse:</strong> Draw signatures on the canvas</li>
-                                        <li><strong>Ctrl+Z</strong> (Windows) / <strong>Cmd+Z</strong> (Mac): Undo last action</li>
+                                        <li><strong>Ctrl+Z</strong> (Windows) / <strong>Cmd+Z</strong> (Mac): Undo last
+                                             action</li>
                                    </ul>
                               </div>
                               <div>
                                    <h4 class="font-medium mb-1 text-[#155DFC]">Actions</h4>
                                    <ul class="list-disc list-inside space-y-1 text-[13px]">
-                                        <li><strong>Delete</strong> or <strong>Backspace:</strong> Clear entire canvas</li>
+                                        <li><strong>Delete</strong> or <strong>Backspace:</strong> Clear entire canvas
+                                        </li>
                                         <li><strong>Escape:</strong> Close modals or exit fullscreen</li>
                                    </ul>
                               </div>
                               <div class="md:col-span-2">
                                    <h4 class="font-medium mb-1 text-[#155DFC]">Zoom (Mouse Wheel)</h4>
                                    <ul class="list-disc list-inside space-y-1 text-[13px]">
-                                        <li><strong>Ctrl + Mouse Wheel</strong> (Windows) / <strong>Cmd + Mouse Wheel</strong> (Mac): Zoom in/out</li>
+                                        <li><strong>Ctrl + Mouse Wheel</strong> (Windows) / <strong>Cmd + Mouse
+                                                  Wheel</strong> (Mac): Zoom in/out</li>
                                         <li><strong>Mouse Wheel</strong> (alone): Scroll through document pages</li>
                                    </ul>
                               </div>
@@ -439,7 +475,8 @@
                </div>
                <div class="mt-4 p-3 bg-[#F0F9FF] rounded-[8px] border-l-4 border-[#155DFC]">
                     <p class="text-[13px] text-[#155DFC]">
-                         <strong>Tip:</strong> For best results, use a stylus or mouse on a smooth surface. The enhance feature can smooth out rough signatures.
+                         <strong>Tip:</strong> For best results, use a stylus or mouse on a smooth surface. The enhance
+                         feature can smooth out rough signatures.
                     </p>
                </div>
           </div>
