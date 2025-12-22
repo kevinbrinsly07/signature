@@ -1,10 +1,12 @@
-# Digital Tools Suite
+# SignMe - Digital Signature & Stamp Designer Suite
 
-A comprehensive web-based suite for digital signature capture and custom stamp design. Create professional signatures with HTML5 Canvas and design custom stamps with various shapes, text, and styling options. Powered by Jaan Network.
+**Version 1.1**
+
+A comprehensive web-based suite for digital signature capture and custom stamp design. Create professional signatures with HTML5 Canvas and design custom stamps with various shapes, text, and styling options. Perfect for businesses, legal documents, and creative projects.
 
 ## Overview
 
-This project provides two main tools accessible through a unified interface:
+SignMe provides two powerful tools in a unified, user-friendly interface:
 - **Document Signing**: Professional signature capture and creation tool
 - **Stamp Designer**: Custom stamp design tool with multiple shapes and enhancement options
 
@@ -26,7 +28,7 @@ This project provides two main tools accessible through a unified interface:
   - Export as transparent PNG
   - High-quality output suitable for documents
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
-- **Keyboard Shortcuts**: 
+- **Keyboard Shortcuts**:
   - Ctrl+Z: Undo
   - Del/Backspace: Clear canvas
   - Esc: Close modal
@@ -35,7 +37,7 @@ This project provides two main tools accessible through a unified interface:
 ### Stamp Designer
 - **Shape Options**: Circle, rectangle, oval, and triangle stamp shapes
 - **Size Customization**: Adjust width and height from 20mm to 350mm
-- **Color Controls**: 
+- **Color Controls**:
   - Fill color selection
   - Border color and thickness adjustment
   - Hollow or filled shape styles
@@ -44,7 +46,7 @@ This project provides two main tools accessible through a unified interface:
   - Various font options
   - Adjustable size, color, and curve effects
   - Text positioning and rotation
-- **Layer Management**: 
+- **Layer Management**:
   - Organize elements with move up/down functionality
   - Delete individual layers
   - Real-time preview of all changes
@@ -69,14 +71,14 @@ This project provides two main tools accessible through a unified interface:
 
 ## Installation
 
-1. Clone or download the project files to your web server directory
-2. Ensure the server serves the files correctly (e.g., via Apache, Nginx, or MAMP)
-3. Open `index.html` in your web browser
+1. Upload all files to your web server
+2. Ensure the server serves the files correctly (e.g., via Apache, Nginx, or any web hosting)
+3. Open `index.html` in your web browser to start using SignMe
 
-For local development with MAMP:
-- Place the project folder in `/Applications/MAMP/htdocs/`
-- Start MAMP servers
-- Access via `http://localhost/signature/`
+### Local Development Setup
+For local testing, you can use any local server:
+- Place the project folder in your web server's document root
+- Access via your localhost URL
 
 ## Getting Started
 
@@ -87,7 +89,7 @@ For local development with MAMP:
 
 ### Document Signing Usage
 1. **Start Drawing**: Click and drag on the white canvas to draw your signature
-2. **Adjust Pen**: 
+2. **Adjust Pen**:
    - Select pen thickness using the preset buttons (thin/medium/bold/thick)
    - Choose pen color using the color picker
 3. **Use Tools**:
@@ -100,7 +102,7 @@ For local development with MAMP:
 
 ### Stamp Designer Usage
 1. **Select Shape**: Choose from circle, rectangle, oval, or triangle
-2. **Configure Dimensions**: 
+2. **Configure Dimensions**:
    - Adjust width and height using sliders (20-350mm)
    - Toggle between filled and hollow shapes
 3. **Style the Stamp**:
@@ -132,10 +134,12 @@ For local development with MAMP:
 ## Project Structure
 
 ```
-signature/
+signme/
 ├── index.html                  # Main page - Document Signing tool
 ├── stamp-designer.html         # Stamp Designer tool
 ├── README.md                   # Project documentation
+├── CHANGELOG.md                # Version history
+├── LICENSE.txt                 # License information
 ├── js/
 │   ├── script.js              # Signature capture functionality
 │   └── stamp-designer.js      # Stamp design functionality
@@ -153,57 +157,26 @@ signature/
 │   ├── bold-icon.svg          # Bold pen preset
 │   ├── thick-icon.svg         # Thick pen preset
 │   └── stamp/                 # Stamp-related assets
-└── v1/                        # Previous version files
-    ├── index.html
-    └── stamp-designer.html
+└── documentation/             # User guides and installation docs
+    ├── installation-guide.html
+    └── user-guide.html
 ```
 
-## Development
+## Changelog
 
-### Key Components
-- **Canvas API**: Used extensively for signature drawing and stamp rendering
-- **Event Listeners**: Mouse and touch event handling for cross-device compatibility
-- **Layer System**: Custom implementation for managing stamp design elements
-- **Image Processing**: Real-time canvas manipulation for enhancement effects
-
-### Enhancement Algorithms
-The stamp enhancement feature uses canvas pixel manipulation to create realistic effects:
-- **Vintage**: Applies paper texture, ink fading, aging spots, and weathering
-- **Fadeout**: Creates worn areas and ink degradation patterns
-- Both effects use randomization for authentic appearance
-
-## Version History
-
-- **Current Version**: Modern UI with Tailwind CSS, enhanced features, and improved UX
-- **v1/**: Previous version maintained for reference (accessible in v1 folder)
-
-## Contributing
-
-Contributions are welcome! If you'd like to improve this project:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improvement`)
-3. Make your changes
-4. Test thoroughly across different browsers and devices
-5. Submit a pull request with a clear description of changes
-
-## Known Issues & Limitations
-
-- Enhancement effects are applied at export time and cannot be reversed
-- Very large canvas sizes may impact performance on older devices
-- Some fonts may not render consistently across all browsers
+See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
 
 ## License
 
-This project is open source and available for use and modification.
+This script is sold under the Regular License on CodeCanyon. See [LICENSE.txt](LICENSE.txt) for details.
 
 ## Support
 
-For issues, questions, or feature requests, please contact Jaan Network.
+For support, please use the CodeCanyon comment section or contact the author through Envato's messaging system.
 
 ## Credits
 
-**Powered by Jaan Network © 2025**
+**Developed by Jaan Network © 2025**
 
 Built with:
 - HTML5 Canvas API

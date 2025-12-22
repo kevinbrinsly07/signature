@@ -1,0 +1,29 @@
+SignMe - Digital Signature & Stamp Designer Suite
+
+Envato Market License
+
+This script is sold exclusively on CodeCanyon (part of Envato Market). By purchasing this script, you agree to the following license terms:
+
+## Regular License
+The Regular License grants you, the purchaser, an ongoing, non-exclusive, worldwide license to make use of the digital work (Item) you have selected.
+
+### What you CAN do:
+- You can create one End Product for yourself or for a client
+- You can modify the Item and therefore create a derivative work
+- You can combine the Item with other works and make a derivative work
+- You can use the Item to create one End Product for sale
+
+### What you CANNOT do:
+- You cannot sell the End Product, except to one client
+- You cannot re-distribute the Item as stock, in a tool or template
+- You cannot use the Item in any application allowing an end user to build their own End Products using the Item
+
+## Extended License
+If you require an Extended License, please purchase it separately from CodeCanyon.
+
+For more information about Envato licenses, please visit: https://codecanyon.net/licenses
+
+## Copyright
+Copyright © 2025 Jaan Network. All rights reserved.
+
+The script and its components are protected by copyright law. Unauthorized copying, modification, or distribution is prohibited.

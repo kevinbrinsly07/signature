@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignMe - User Guide</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
+        h1, h2, h3 { color: #333; }
+        .section { margin-bottom: 30px; }
+        .step { margin-bottom: 15px; margin-left: 20px; }
+        .tip { background: #e8f4fd; padding: 10px; border-left: 4px solid #2196F3; margin: 10px 0; }
+        .warning { background: #fff3e0; padding: 10px; border-left: 4px solid #ff9800; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>SignMe User Guide</h1>
+    <p><strong>Version 1.1</strong></p>
+
+    <div class="section">
+        <h2>Overview</h2>
+        <p>SignMe is a comprehensive web-based suite that provides two powerful tools:</p>
+        <ul>
+            <li><strong>Document Signing</strong>: Create professional digital signatures</li>
+            <li><strong>Stamp Designer</strong>: Design custom stamps with various shapes and effects</li>
+        </ul>
+        <p>You can switch between these tools using the navigation in the header.</p>
+    </div>
+
+    <div class="section">
+        <h2>Document Signing Tool</h2>
+
+        <h3>Getting Started</h3>
+        <div class="step">
+            <strong>1. Access the Tool</strong><br>
+            Open <code>index.html</code> in your web browser. The Document Signing tool loads by default.
+        </div>
+
+        <div class="step">
+            <strong>2. Drawing Your Signature</strong><br>
+            Click and drag on the white canvas to draw your signature. The canvas responds to both mouse and touch input.
+        </div>
+
+        <h3>Drawing Tools</h3>
+        <ul>
+            <li><strong>Pen Mode</strong>: Default drawing tool with adjustable thickness and color</li>
+            <li><strong>Eraser Mode</strong>: Remove parts of your signature</li>
+            <li><strong>Pen Thickness</strong>: Choose from Thin, Medium, Bold, or Thick presets</li>
+            <li><strong>Color Picker</strong>: Select any color for your signature</li>
+        </ul>
+
+        <h3>Canvas Controls</h3>
+        <ul>
+            <li><strong>Undo (Ctrl+Z)</strong>: Remove the last stroke</li>
+            <li><strong>Clear (Del/Backspace)</strong>: Reset the entire canvas</li>
+            <li><strong>Fullscreen</strong>: Expand canvas for detailed work</li>
+            <li><strong>Enhance</strong>: Smooth and professionalize your signature</li>
+        </ul>
+
+        <h3>Exporting Your Signature</h3>
+        <div class="step">
+            <strong>1. Click "Save Signature"</strong> to open the preview modal
+        </div>
+        <div class="step">
+            <strong>2. Review your signature</strong> in the preview
+        </div>
+        <div class="step">
+            <strong>3. Click "Download PNG"</strong> to save as a transparent PNG file
+        </div>
+
+        <div class="tip">
+            <strong>Tip:</strong> PNG files with transparency work well in documents and can be easily imported into PDF editors, word processors, or design software.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Stamp Designer Tool</h2>
+
+        <h3>Getting Started</h3>
+        <div class="step">
+            <strong>1. Access the Tool</strong><br>
+            Click "Stamp Designer" in the navigation or open <code>stamp-designer.html</code> directly.
+        </div>
+
+        <h3>Creating a Basic Stamp</h3>
+        <div class="step">
+            <strong>1. Select Shape</strong><br>
+            Choose from Circle, Rectangle, Oval, or Triangle
+        </div>
+
+        <div class="step">
+            <strong>2. Set Dimensions</strong><br>
+            Adjust width and height using the sliders (20mm to 350mm)
+        </div>
+
+        <div class="step">
+            <strong>3. Choose Style</strong><br>
+            Select filled or hollow shape, and set colors
+        </div>
+
+        <h3>Adding Text</h3>
+        <div class="step">
+            <strong>1. Enter Text</strong><br>
+            Type your desired text in the text input field
+        </div>
+
+        <div class="step">
+            <strong>2. Customize Appearance</strong><br>
+            Select font, size, color, and curve level
+        </div>
+
+        <div class="step">
+            <strong>3. Add to Stamp</strong><br>
+            Click "Add Text" to place the text on your stamp
+        </div>
+
+        <h3>Managing Layers</h3>
+        <p>Stamps can have multiple elements. Use the layer panel to:</p>
+        <ul>
+            <li>Move elements up or down in the stacking order</li>
+            <li>Delete unwanted elements</li>
+            <li>Select elements for editing</li>
+        </ul>
+
+        <h3>Enhancement Styles</h3>
+        <p>Apply realistic effects to your stamp:</p>
+        <ul>
+            <li><strong>Original</strong>: Clean, standard stamp design</li>
+            <li><strong>Vintage</strong>: Aged appearance with paper texture and weathering</li>
+            <li><strong>Fadeout</strong>: Worn effect from repeated use</li>
+        </ul>
+
+        <h3>Exporting Your Stamp</h3>
+        <div class="step">
+            <strong>1. Click "Export PNG"</strong> to open the enhancement preview
+        </div>
+
+        <div class="step">
+            <strong>2. Choose a style</strong> (Original, Vintage, or Fadeout)
+        </div>
+
+        <div class="step">
+            <strong>3. Click "Export Selected"</strong> to download your stamp
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Keyboard Shortcuts</h2>
+        <table border="1" cellpadding="5" cellspacing="0">
+            <tr><th>Shortcut</th><th>Action</th><th>Tool</th></tr>
+            <tr><td>Ctrl+Z</td><td>Undo last stroke</td><td>Document Signing</td></tr>
+            <tr><td>Del / Backspace</td><td>Clear canvas</td><td>Document Signing</td></tr>
+            <tr><td>Esc</td><td>Close modal</td><td>Both</td></tr>
+            <tr><td>Shift+Drag</td><td>Continuous drawing</td><td>Document Signing</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Troubleshooting</h2>
+
+        <h3>Signature Looks Jagged</h3>
+        <p>Use the "Enhance" button to smooth your signature, or try drawing with a thicker pen setting.</p>
+
+        <h3>Text Not Appearing Correctly</h3>
+        <p>Some fonts may not render consistently across browsers. Try a different font or check browser compatibility.</p>
+
+        <h3>Canvas Not Responding</h3>
+        <p>Ensure you're using a modern browser with HTML5 Canvas support. Clear your browser cache if issues persist.</p>
+
+        <div class="warning">
+            <strong>Warning:</strong> Enhancement effects are applied during export and cannot be undone. Always preview before downloading.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Browser Compatibility</h2>
+        <ul>
+            <li>Chrome 60+</li>
+            <li>Firefox 55+</li>
+            <li>Safari 11+</li>
+            <li>Edge 79+</li>
+            <li>Mobile browsers (iOS Safari, Chrome Mobile)</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Support</h2>
+        <p>For questions or issues, please use the CodeCanyon comment section or contact the author through Envato's messaging system.</p>
+    </div>
+</body>
+</html>

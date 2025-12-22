@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignMe - Installation Guide</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
+        h1, h2, h3 { color: #333; }
+        .step { margin-bottom: 20px; }
+        .code { background: #f4f4f4; padding: 10px; border-radius: 4px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>SignMe Installation Guide</h1>
+    <p><strong>Version 1.1</strong></p>
+
+    <h2>System Requirements</h2>
+    <ul>
+        <li>Modern web browser with HTML5 Canvas support (Chrome 60+, Firefox 55+, Safari 11+, Edge 79+)</li>
+        <li>Web server (Apache, Nginx, or any hosting service)</li>
+        <li>Internet connection for CDN resources</li>
+    </ul>
+
+    <h2>Installation Steps</h2>
+
+    <div class="step">
+        <h3>Step 1: Upload Files</h3>
+        <p>Upload all the files from the SignMe package to your web server. You can place them in the root directory or a subdirectory.</p>
+        <p><strong>Example directory structure after upload:</strong></p>
+        <div class="code">
+        your-website.com/<br>
+        ├── index.html<br>
+        ├── stamp-designer.html<br>
+        ├── README.md<br>
+        ├── CHANGELOG.md<br>
+        ├── LICENSE.txt<br>
+        ├── js/<br>
+        ├── assets/<br>
+        └── documentation/
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>Step 2: Set Permissions</h3>
+        <p>Ensure your web server has read permissions for all files. For most hosting providers, this is set by default.</p>
+    </div>
+
+    <div class="step">
+        <h3>Step 3: Access the Application</h3>
+        <p>Open your web browser and navigate to the URL where you uploaded the files.</p>
+        <p><strong>Example:</strong> <code>https://your-domain.com/signme/</code></p>
+        <p>The main page (index.html) will load the Document Signing tool by default.</p>
+    </div>
+
+    <h2>Configuration</h2>
+    <p>SignMe works out of the box without additional configuration. All resources are loaded from CDNs for optimal performance.</p>
+
+    <h3>Optional: Local CDN Setup</h3>
+    <p>If you prefer to host the CDN resources locally:</p>
+    <ol>
+        <li>Download Tailwind CSS, Font Awesome, PDF.js, and PDF-lib</li>
+        <li>Update the CDN links in both HTML files to point to your local copies</li>
+        <li>Update the asset paths if necessary</li>
+    </ol>
+
+    <h2>Troubleshooting</h2>
+
+    <h3>Canvas Not Working</h3>
+    <p>Ensure your browser supports HTML5 Canvas. Update to the latest version of your browser.</p>
+
+    <h3>Assets Not Loading</h3>
+    <p>Check that all files were uploaded correctly and that file permissions are set properly.</p>
+
+    <h3>CDN Resources Blocked</h3>
+    <p>If CDN resources are blocked by your network, consider hosting them locally or using a different CDN.</p>
+
+    <h2>Support</h2>
+    <p>For installation issues, please use the CodeCanyon comment section or contact support through Envato's messaging system.</p>
+</body>
+</html>
