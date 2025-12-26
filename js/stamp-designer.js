@@ -763,6 +763,7 @@ class StampDesigner {
     drawTextWithEffects(textElement, x, y) {
         const text = textElement.text;
         const color = textElement.color || '#000000';
+        const letterSpacing = textElement.letterSpacing || 0;
 
         // Save context state
         this.ctx.save();
@@ -779,7 +780,7 @@ class StampDesigner {
         if (textElement.shadow) {
             this.ctx.save();
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            this.ctx.fillText(text, x + 2, y + 2);
+            this.drawTextWithSpacing(this.ctx, text, x + 2, y + 2, letterSpacing);
             this.ctx.restore();
         }
 
@@ -788,16 +789,38 @@ class StampDesigner {
             this.ctx.save();
             this.ctx.strokeStyle = textElement.outlineColor || '#ffffff';
             this.ctx.lineWidth = 2;
-            this.ctx.strokeText(text, x, y);
+            this.drawTextWithSpacing(this.ctx, text, x, y, letterSpacing, true); // true for stroke
             this.ctx.restore();
         }
 
         // Draw main text
         this.ctx.fillStyle = color;
-        this.ctx.fillText(text, x, y);
+        this.drawTextWithSpacing(this.ctx, text, x, y, letterSpacing);
         
         // Restore context state
         this.ctx.restore();
+    }
+
+    drawTextWithSpacing(ctx, text, x, y, letterSpacing, isStroke = false) {
+        if (letterSpacing === 0) {
+            if (isStroke) {
+                ctx.strokeText(text, x, y);
+            } else {
+                ctx.fillText(text, x, y);
+            }
+            return;
+        }
+
+        let currentX = x;
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            if (isStroke) {
+                ctx.strokeText(char, currentX, y);
+            } else {
+                ctx.fillText(char, currentX, y);
+            }
+            currentX += ctx.measureText(char).width + letterSpacing;
+        }
     }
 
     drawCurvedTextWithEffects(textElement, centerX, centerY) {
@@ -1316,6 +1339,7 @@ class StampDesigner {
     drawTextWithEffectsToContext(ctx, textElement, x, y) {
         const text = textElement.text;
         const color = textElement.color || '#000000';
+        const letterSpacing = textElement.letterSpacing || 0;
 
         // Save context state
         ctx.save();
@@ -1332,7 +1356,7 @@ class StampDesigner {
         if (textElement.shadow) {
             ctx.save();
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillText(text, x + 2, y + 2);
+            this.drawTextWithSpacing(ctx, text, x + 2, y + 2, letterSpacing);
             ctx.restore();
         }
 
@@ -1341,13 +1365,13 @@ class StampDesigner {
             ctx.save();
             ctx.strokeStyle = textElement.outlineColor || '#ffffff';
             ctx.lineWidth = 2;
-            ctx.strokeText(text, x, y);
+            this.drawTextWithSpacing(ctx, text, x, y, letterSpacing, true); // true for stroke
             ctx.restore();
         }
 
         // Draw main text
         ctx.fillStyle = color;
-        ctx.fillText(text, x, y);
+        this.drawTextWithSpacing(ctx, text, x, y, letterSpacing);
         
         // Restore context state
         ctx.restore();
