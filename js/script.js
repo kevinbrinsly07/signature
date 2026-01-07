@@ -402,6 +402,10 @@ document.addEventListener('keydown', function(e) {
 });
 document.addEventListener('keyup', function(e) {
     if (e.key === 'Shift') {
+        // Complete the current path
+        if (hasStarted) {
+            ctx.stroke();
+        }
         drawing = false;
         hasStarted = false;
         // Save signature for current page
@@ -512,25 +516,33 @@ function draw(e) {
     let currentTime = Date.now();
     let distance = Math.sqrt((x - lastX) ** 2 + (y - lastY) ** 2);
     let timeDiff = currentTime - lastTime;
-    const displayScale = (canvas.width / parseFloat(canvas.style.width || canvas.width)) / zoomLevel;
+    
+    // Simplify line width for better visibility
+    let lineWidth = baseWidth;
     if (timeDiff > 0) {
         let speed = distance / timeDiff;
-        let maxSpeed = 3; // Reduced for more variation
+        let maxSpeed = 3;
         let factor = Math.min(speed / maxSpeed, 1);
         if (currentMode === 'pen') {
-            ctx.lineWidth = Math.max(baseWidth * displayScale * (1 - factor * 0.9), 1); // Increased factor for stronger effect
-        } else {
-            ctx.lineWidth = baseWidth * displayScale;
+            lineWidth = Math.max(baseWidth * (1 - factor * 0.7), 1);
         }
     }
+    ctx.lineWidth = lineWidth;
+    
     if (!hasStarted) {
+        // Start new path segment
         ctx.beginPath();
         ctx.moveTo(x, y);
         hasStarted = true;
     } else {
+        // Continue drawing - draw line to current position and stroke immediately
         ctx.lineTo(x, y);
         ctx.stroke();
+        // Start new path from current position for smoother drawing
+        ctx.beginPath();
+        ctx.moveTo(x, y);
     }
+    
     lastX = x;
     lastY = y;
     lastTime = currentTime;
